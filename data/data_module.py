@@ -33,10 +33,12 @@ class Recipe_Dataset(LightningDataModule):
     def food_id_to_name(self, id):
         return self.ingr_id_to_name_map[id]
 
+    def food_name_to_id(self, name):
+        return self.ingr_name_to_id_map[id]
+
     # preparation
     def prepare_data(self):
-        recipe_df = self.prepare_recipe_dataframe()
-        return recipe_df
+        pass
 
     def prepare_recipe_dataframe(self):
         recipe_df = pd.read_csv(self.PP_RECIPES_FILE)
@@ -54,7 +56,8 @@ class Recipe_Dataset(LightningDataModule):
         return ingr_map
 
     def setup(self):
-        pass
+        recipe_df = self.prepare_recipe_dataframe()
+        return recipe_df
 
     # dataloaders
     def train_dataloader(self):
