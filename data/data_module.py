@@ -16,6 +16,17 @@ class Recipe_Dataset(LightningDataModule):
     def __repr__(self):
         return 'Recipe_Dataset()'
 
+    # specs
+    @cached_property
+    def num_ingredients(self):
+        ''' Number of unique ingredients in dataset '''
+        return len(self.ingr_id_to_name_map)
+
+    @cached_property
+    def num_recipes(self):
+        ''' Number of unique recipes in dataset '''
+        return self.recipe_df.count(axis='columns')
+
     # converters
     @cached_property
     def ingr_id_to_name_map(self):
@@ -31,7 +42,7 @@ class Recipe_Dataset(LightningDataModule):
     def ingr_name_to_id_map(self):
         if not hasattr(self, 'ingr_map'):
             raise RuntimeError(
-                'Must load ingr_map before calling ingr_id_to_name_map.'
+                'Must load ingr_map before calling ingr_name_to_id_map.'
             )
         return {
             row['replaced'] : row['id'] for _, row in self.ingr_map.iterrows()
@@ -44,9 +55,6 @@ class Recipe_Dataset(LightningDataModule):
         return self.ingr_name_to_id_map[id]
 
     # preparation
-    def prepare_data(self):
-        pass
-
     def prepare_recipe_dataframe(self):
         recipe_df = pd.read_csv(self.PP_RECIPES_FILE)
         recipe_df = recipe_df.drop(
@@ -62,9 +70,16 @@ class Recipe_Dataset(LightningDataModule):
             ingr_map = pickle.load(ingr_map_file)
         return ingr_map
 
+    # setup
+    def prepare_data(self):
+        pass
+
     def setup(self):
-        self.recipe_df = self.prepare_recipe_dataframe()
-        self.ingr_map = self.prepare_ingr_map()
+        # load files
+        recipe_df = self.prepare_recipe_dataframe()
+        ingr_map = self.prepare_ingr_map()
+        # split training data
+
         return recipe_df
 
     # dataloaders
