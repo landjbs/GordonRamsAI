@@ -12,8 +12,7 @@ class Recipe_Dataset(LightningDataModule):
 
     def __init__(self):
         super().__init__()
-        ingr_map = self.prepare_ingr_map()
-        print(ingr_map)
+        self.ingr_map = self.prepare_ingr_map()
 
     def __repr__(self):
         return 'Recipe_Dataset()'
@@ -21,11 +20,15 @@ class Recipe_Dataset(LightningDataModule):
     # converters
     @cached_property
     def ingr_id_to_name_map(self):
-        return
+        return {
+            row['id'] : row['replaced'] for _, row in self.ingr_map.iterrows()
+        }
 
     @cached_property
     def ingr_name_to_id_map(self):
-        return
+        return {
+            row['replaced'] : row['id'] for _, row in self.ingr_map.iterrows()
+        }
 
     def food_id_to_name(self, id):
         return self.ingr_id_to_name_map[id]
