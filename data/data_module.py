@@ -12,14 +12,27 @@ class Recipe_Dataset(LightningDataModule):
 
     def __init__(self):
         super().__init__()
+        ingr_map = self.prepare_ingr_map()
+        print(ingr_map)
 
     def __repr__(self):
         return 'Recipe_Dataset()'
 
+    # converters
+    @cached_property
+    def ingr_id_to_name_map(self):
+        return
+
+    @cached_property
+    def ingr_name_to_id_map(self):
+        return
+
+    def food_id_to_name(self, id):
+        return self.ingr_id_to_name_map[id]
+
     # preparation
     def prepare_data(self):
         recipe_df = self.prepare_recipe_dataframe()
-        ingr_map = self.prepare_ingr_map()
         return recipe_df
 
     def prepare_recipe_dataframe(self):
@@ -33,7 +46,7 @@ class Recipe_Dataset(LightningDataModule):
         return recipe_df
 
     def prepare_ingr_map(self):
-        with open(self.INGR_MAP_FILE) as ingr_map_file:
+        with open(self.INGR_MAP_FILE, 'rb') as ingr_map_file:
             ingr_map = pickle.load(ingr_map_file)
         return ingr_map
 
