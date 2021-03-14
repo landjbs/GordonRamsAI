@@ -12,7 +12,6 @@ class Recipe_Dataset(LightningDataModule):
 
     def __init__(self):
         super().__init__()
-        self.ingr_map = self.prepare_ingr_map()
 
     def __repr__(self):
         return 'Recipe_Dataset()'
@@ -20,12 +19,20 @@ class Recipe_Dataset(LightningDataModule):
     # converters
     @cached_property
     def ingr_id_to_name_map(self):
+        if not hasattr(self, 'ingr_map'):
+            raise RuntimeError(
+                'Must load ingr_map before calling ingr_id_to_name_map.'
+            )
         return {
             row['id'] : row['replaced'] for _, row in self.ingr_map.iterrows()
         }
 
     @cached_property
     def ingr_name_to_id_map(self):
+        if not hasattr(self, 'ingr_map'):
+            raise RuntimeError(
+                'Must load ingr_map before calling ingr_id_to_name_map.'
+            )
         return {
             row['replaced'] : row['id'] for _, row in self.ingr_map.iterrows()
         }
@@ -56,7 +63,8 @@ class Recipe_Dataset(LightningDataModule):
         return ingr_map
 
     def setup(self):
-        recipe_df = self.prepare_recipe_dataframe()
+        self.recipe_df = self.prepare_recipe_dataframe()
+        self.ingr_map = self.prepare_ingr_map()
         return recipe_df
 
     # dataloaders
