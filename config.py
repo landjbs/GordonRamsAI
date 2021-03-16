@@ -13,8 +13,12 @@ class Config:
 
     def data_split_assertions(self):
         split_fracs = (self.train_frac, self.val_frac, self.test_frac)
-        assert (sum(split_fracs) == 1), 'Data split fractions must sum to 1.'
-        assert all(split_fracs >= 0), 'Data split fractions must be geq 0.'
+        assert (round(sum(split_fracs), 4) == 1), (
+            f'Data split fractions must sum to 1 (found {sum(split_fracs)}).'
+        )
+        assert all(x >= 0 for x in split_fracs), (
+            'All data split fractions must be greater than or equal to 0.'
+        )
         return True
 
     def run_assertions(self):

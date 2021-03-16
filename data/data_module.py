@@ -95,6 +95,9 @@ class Recipe_Dataset(LightningDataModule):
         self.train_data = train_data
         self.val_data = val_data
         self.test_data = test_data
+        print(self.train_data.head())
+        print(self.val_data.head())
+        print(self.test_data.head())
         # return recipe_dataset
 
     # dataloaders
