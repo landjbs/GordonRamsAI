@@ -1,4 +1,7 @@
+import re
+import torch
 import pickle
+import numpy as np
 import pandas as pd
 from cached_property import cached_property
 from pytorch_lightning import LightningDataModule
@@ -10,8 +13,11 @@ class Recipe_Dataset(LightningDataModule):
     PP_RECIPES_FILE = f'{DATA_ROOT_DIR}/PP_recipes.csv'
     INGR_MAP_FILE = f'{DATA_ROOT_DIR}/ingr_map.pkl'
 
-    def __init__(self):
+    def __init__(self, config):
         super().__init__()
+        self.train_frac = config.train_frac
+        self.val_frac = config.val_frac
+        self.test_frac = config.test_frac
 
     def __repr__(self):
         return 'Recipe_Dataset()'
@@ -55,8 +61,10 @@ class Recipe_Dataset(LightningDataModule):
         return self.ingr_name_to_id_map[id]
 
     # preparation
-    def prepare_recipe_dataframe(self):
+    def prepare_recipe_dataset(self):
+        # load dataframe
         recipe_df = pd.read_csv(self.PP_RECIPES_FILE)
+        # remove unnecessary columns
         recipe_df = recipe_df.drop(
             columns=[
                 'techniques', 'calorie_level', 'steps_tokens',
@@ -76,11 +84,18 @@ class Recipe_Dataset(LightningDataModule):
 
     def setup(self):
         # load files
-        recipe_df = self.prepare_recipe_dataframe()
+        recipe_dataset = self.prepare_recipe_dataset()
         ingr_map = self.prepare_ingr_map()
         # split training data
-
-        return recipe_df
+        train_data = recipe_dataset.sample(frac=self.train_frac)
+        remaining_data = recipe_dataset.drop(train_data.index)
+        val_data = remaining_data.sample(frac=self.val_frac)
+        test_data = remaining_data.drop(val_data.index)
+        # cache datasets
+        self.train_data = train_data
+        self.val_data = val_data
+        self.test_data = test_data
+        # return recipe_dataset
 
     # dataloaders
     def train_dataloader(self):
