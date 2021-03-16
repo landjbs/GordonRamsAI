@@ -15,6 +15,7 @@ class Recipe_Dataset(LightningDataModule):
 
     def __init__(self, config):
         super().__init__()
+        self.batch_size = config.batch_size
         self.train_frac = config.train_frac
         self.val_frac = config.val_frac
         self.test_frac = config.test_frac
@@ -73,6 +74,15 @@ class Recipe_Dataset(LightningDataModule):
         )
         return recipe_df
 
+    def split_data(self, dataframe):
+        ''' split training data '''
+        train_data = recipe_dataset.sample(frac=self.train_frac)
+        remaining_data = recipe_dataset.drop(train_data.index)
+        val_count = int(self.val_frac * len(recipe_dataset))
+        val_data = remaining_data.sample(n=val_count)
+        test_data = remaining_data.drop(val_data.index)
+        return (train_data, val_data, test_data)
+
     def prepare_ingr_map(self):
         with open(self.INGR_MAP_FILE, 'rb') as ingr_map_file:
             ingr_map = pickle.load(ingr_map_file)
@@ -86,23 +96,18 @@ class Recipe_Dataset(LightningDataModule):
         # load files
         recipe_dataset = self.prepare_recipe_dataset()
         ingr_map = self.prepare_ingr_map()
-        # split training data
-        train_data = recipe_dataset.sample(frac=self.train_frac)
-        remaining_data = recipe_dataset.drop(train_data.index)
-        val_data = remaining_data.sample(frac=self.val_frac)
-        test_data = remaining_data.drop(val_data.index)
         # cache datasets
-        self.train_data = train_data
-        self.val_data = val_data
-        self.test_data = test_data
-        print(self.train_data.head())
-        print(self.val_data.head())
-        print(self.test_data.head())
-        # return recipe_dataset
+        (
+            self.train_data,
+            self.val_data,
+            self.test_data
+        ) = self.split_data(recipe_df)
 
     # dataloaders
     def train_dataloader(self):
-        pass
+        return torch.utils.data.DataLoader(
+            self.train_data, batch_size=self.batch_size
+        )
 
     def val_dataloader(self):
         pass
