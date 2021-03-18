@@ -7,7 +7,7 @@ from cached_property import cached_property
 from pytorch_lightning import LightningDataModule
 
 
-class RecipeDataset(torch.utisl.data.Dataset):
+class RecipeDataset(torch.utils.data.Dataset):
     def __init__(self, dataframe):
         super().__init__()
         self.length = len(dataframe)
@@ -17,7 +17,7 @@ class RecipeDataset(torch.utisl.data.Dataset):
         return self.length
 
     def __getitem__(self, key):
-        return None
+        return self.data.loc[key]
 
 
 class RecipeDataModule(LightningDataModule):
@@ -95,6 +95,10 @@ class RecipeDataModule(LightningDataModule):
         val_count = int(self.val_frac * len(recipe_dataset))
         val_data = remaining_data.sample(n=val_count)
         test_data = remaining_data.drop(val_data.index)
+        # reset indecies to be 0 through len indexeds
+        train_data = train_data.reset_index()
+        val_data = val_data.reset_index()
+        test_data = test_data.reset_index()
         # cast as torch datasets
         train_data = RecipeDataset(train_data)
         val_data = RecipeDataset(val_data)

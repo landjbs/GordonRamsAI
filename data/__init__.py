@@ -1,1 +1,1 @@
-from .data_module import Recipe_Dataset
+from .data_module import RecipeDataModule
