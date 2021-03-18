@@ -7,7 +7,20 @@ from cached_property import cached_property
 from pytorch_lightning import LightningDataModule
 
 
-class Recipe_Dataset(LightningDataModule):
+class RecipeDataset(torch.utisl.data.Dataset):
+    def __init__(self, dataframe):
+        super().__init__()
+        self.length = len(dataframe)
+        self.data = dataframe
+
+    def __len__(self):
+        return self.length
+
+    def __getitem__(self, key):
+        return None
+
+
+class RecipeDataModule(LightningDataModule):
     # data files
     DATA_ROOT_DIR = 'data/archive'
     PP_RECIPES_FILE = f'{DATA_ROOT_DIR}/PP_recipes.csv'
@@ -74,13 +87,18 @@ class Recipe_Dataset(LightningDataModule):
         )
         return recipe_df
 
-    def split_data(self, dataframe):
+    def split_data(self, recipe_dataset):
         ''' split training data '''
+        #
         train_data = recipe_dataset.sample(frac=self.train_frac)
         remaining_data = recipe_dataset.drop(train_data.index)
         val_count = int(self.val_frac * len(recipe_dataset))
         val_data = remaining_data.sample(n=val_count)
         test_data = remaining_data.drop(val_data.index)
+        # cast as torch datasets
+        train_data = RecipeDataset(train_data)
+        val_data = RecipeDataset(val_data)
+        test_data = RecipeDataset(test_data)
         return (train_data, val_data, test_data)
 
     def prepare_ingr_map(self):
@@ -96,12 +114,12 @@ class Recipe_Dataset(LightningDataModule):
         # load files
         recipe_dataset = self.prepare_recipe_dataset()
         ingr_map = self.prepare_ingr_map()
-        # cache datasets
+        # split and cache datasets
         (
             self.train_data,
             self.val_data,
             self.test_data
-        ) = self.split_data(recipe_df)
+        ) = self.split_data(recipe_dataset)
 
     # dataloaders
     def train_dataloader(self):
