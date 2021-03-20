@@ -17,7 +17,10 @@ class RecipeDataset(torch.utils.data.Dataset):
         return self.length
 
     def __getitem__(self, key):
-        return self.data.loc[key]
+        # grab row at index
+        series = self.data.loc[key]
+        # cast data segment as tensor
+        return torch.tensor(series)
 
 
 class RecipeDataModule(LightningDataModule):
@@ -100,9 +103,12 @@ class RecipeDataModule(LightningDataModule):
         val_data = val_data.reset_index()
         test_data = test_data.reset_index()
         # cast as torch datasets
-        train_data = RecipeDataset(train_data)
-        val_data = RecipeDataset(val_data)
-        test_data = RecipeDataset(test_data)
+        # train_data = RecipeDataset(train_data)
+        # val_data = RecipeDataset(val_data)
+        # test_data = RecipeDataset(test_data)
+        for data in [train_data, val_data, test_data]:
+            series = data['ingredient_ids'].map(lambda x: len(x))
+            print(f'min: {series.min()} max: {series.max()}')
         return (train_data, val_data, test_data)
 
     def prepare_ingr_map(self):
