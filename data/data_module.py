@@ -7,6 +7,14 @@ from cached_property import cached_property
 from pytorch_lightning import LightningDataModule
 
 
+def id_strings_to_id_tensor(s):
+    ''' Converts stirng of ids to tensor '''
+    int_splits = map(int, re.findall('\d+(?=[,\]])', s))
+    data = torch.tensor(int_splits)
+    print(data)
+    return data
+
+
 class RecipeDataset(torch.utils.data.Dataset):
     def __init__(self, dataframe):
         super().__init__()
@@ -103,12 +111,12 @@ class RecipeDataModule(LightningDataModule):
         val_data = val_data.reset_index()
         test_data = test_data.reset_index()
         # cast as torch datasets
-        # train_data = RecipeDataset(train_data)
-        # val_data = RecipeDataset(val_data)
-        # test_data = RecipeDataset(test_data)
-        for data in [train_data, val_data, test_data]:
-            series = data['ingredient_ids'].map(lambda x: len(x))
-            print(f'min: {series.min()} max: {series.max()}')
+        train_data = RecipeDataset(train_data)
+        val_data = RecipeDataset(val_data)
+        test_data = RecipeDataset(test_data)
+        # for data in [train_data, val_data, test_data]:
+            # series = data['ingredient_ids'].map(lambda x: len(x))
+            # print(f'min: {series.min()} max: {series.max()}')
         return (train_data, val_data, test_data)
 
     def prepare_ingr_map(self):
@@ -142,3 +150,9 @@ class RecipeDataModule(LightningDataModule):
 
     def test_dataloader(self):
         pass
+
+    # helpers
+    @staticmethod
+    def id_strings_to_id_tensor(s):
+        ''' Converts stirng of ids to tensor '''
+        return map(int, re.findall('\d+(?=[,\]])', s))
