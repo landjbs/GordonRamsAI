@@ -1,7 +1,7 @@
 class Config:
     def __init__(self, **kwargs):
         # data processing
-        self.batch_size = 100       # size of batch per update step
+        self.batch_size = 10       # size of batch per update step
         self.train_frac = 0.7       # fraction of dataset to use for train
         self.val_frac = 0.2         # fraction of dataset to use for validation
         self.test_frac = 0.1        # fraction of dataset to use for testing

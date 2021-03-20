@@ -7,28 +7,25 @@ from cached_property import cached_property
 from pytorch_lightning import LightningDataModule
 
 
-def id_strings_to_id_tensor(s):
-    ''' Converts stirng of ids to tensor '''
-    int_splits = map(int, re.findall('\d+(?=[,\]])', s))
-    data = torch.tensor(int_splits)
-    print(data)
-    return data
-
-
-class RecipeDataset(torch.utils.data.Dataset):
+class RecipeDataset(torch.utils.data.TensorDataset):
     def __init__(self, dataframe):
         super().__init__()
-        self.length = len(dataframe)
-        self.data = dataframe
+        # self.length = len(dataframe)
+        # self.data = dataframe
+        ingredient_tensor = dataframe['ingredient_ids'].map(
+            id_strings_to_id_tensor
+        )
 
     def __len__(self):
         return self.length
 
     def __getitem__(self, key):
         # grab row at index
-        series = self.data.loc[key]
+        row = self.data.loc[key]
+        # get ingredient sequence
+        ingredients = id_strings_to_id_tensor(row['ingredient_ids'])
         # cast data segment as tensor
-        return torch.tensor(series)
+        return ingredients
 
 
 class RecipeDataModule(LightningDataModule):
@@ -96,11 +93,17 @@ class RecipeDataModule(LightningDataModule):
                 'name_tokens', 'i', 'ingredient_tokens'
             ]
         )
+        # length of longest recipe to use for padding
+        max_len = recipe_df['ingredient_ids'].str.len().max()
+        # convert ingredient_ids to tensor
+        recipe_df['ingredient_ids'].map(
+            lambda s : self.id_strings_to_id_tensor(s, padding=max_len)
+        )
         return recipe_df
 
     def split_data(self, recipe_dataset):
         ''' split training data '''
-        #
+        ####
         train_data = recipe_dataset.sample(frac=self.train_frac)
         remaining_data = recipe_dataset.drop(train_data.index)
         val_count = int(self.val_frac * len(recipe_dataset))
@@ -111,12 +114,16 @@ class RecipeDataModule(LightningDataModule):
         val_data = val_data.reset_index()
         test_data = test_data.reset_index()
         # cast as torch datasets
-        train_data = RecipeDataset(train_data)
-        val_data = RecipeDataset(val_data)
-        test_data = RecipeDataset(test_data)
-        # for data in [train_data, val_data, test_data]:
-            # series = data['ingredient_ids'].map(lambda x: len(x))
-            # print(f'min: {series.min()} max: {series.max()}')
+        # train_data = RecipeDataset(train_data)
+        # val_data = RecipeDataset(val_data)
+        # test_data = RecipeDataset(test_data)
+        import matplotlib.pyplot as plt
+        for n, data in {'train_data': train_data, 'val_data': val_data, 'test_data': test_data}.items():
+            series = data['ingredient_ids'].map(lambda x: len(x))
+            plt.hist(series)
+            plt.title(n)
+            plt.show()
+        raise RuntimeError()
         return (train_data, val_data, test_data)
 
     def prepare_ingr_map(self):
@@ -153,6 +160,10 @@ class RecipeDataModule(LightningDataModule):
 
     # helpers
     @staticmethod
-    def id_strings_to_id_tensor(s):
+    def id_strings_to_padded_id_tensor(s: str, padding: int):
         ''' Converts stirng of ids to tensor '''
-        return map(int, re.findall('\d+(?=[,\]])', s))
+        # convert string to int list
+        ids = list(map(int, re.findall('\d+(?=[,\]])', s)))
+        # cast int list as tensor
+        ids = torch.tensor(ids, dtype=torch.int16)
+        return ids
