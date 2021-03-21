@@ -10,25 +10,24 @@ from pytorch_lightning import LightningDataModule
 class RecipeDataset(torch.utils.data.TensorDataset):
     def __init__(self, dataframe):
         super().__init__()
-        # self.length = len(dataframe)
         self.data = self.dataframe_to_tensor(dataframe)
 
     def __len__(self):
-        return self.length
+        return self.data.size(0)
 
     @classmethod
     def dataframe_to_tensor(cls, dataframe):
-        ingredient_data = dataframe['ingredient_ids'].map(id_string_to_tensor)
-        ingredient_data = torch.nn.utils.rnn.pad_sequence(ingredient_data)
-        print(ingredient_data.shape)
+        ingredient_data = dataframe['ingredient_ids'].map(
+            cls.id_string_to_tensor
+        )
+        ingredient_data = torch.nn.utils.rnn.pad_sequence(
+            ingredient_data,  batch_first=True
+        )
         return ingredient_data
 
     @staticmethod
-    def id_string_to_tensor(s: str, padding: int):
-        '''
-        Converts stirng of ids to tensor.
-        # NOTE: currently doesnt pad.
-        '''
+    def id_string_to_tensor(s: str):
+        ''' Converts string of ids to tensor. '''
         # convert string to int list
         ids = list(map(int, re.findall('\d+(?=[,\]])', s)))
         # cast int list as tensor
@@ -37,7 +36,7 @@ class RecipeDataset(torch.utils.data.TensorDataset):
 
     def __getitem__(self, key):
         # grab row at index
-        ingredients =
+        ingredients = self.data[key]
         return ingredients
 
 
@@ -107,11 +106,11 @@ class RecipeDataModule(LightningDataModule):
             ]
         )
         # length of longest recipe to use for padding
-        max_len = recipe_df['ingredient_ids'].str.len().max()
+        # max_len = recipe_df['ingredient_ids'].str.len().max()
         # convert ingredient_ids to tensor
-        recipe_df['ingredient_ids'].map(
-            lambda s : self.id_strings_to_padded_id_tensor(s, padding=max_len)
-        )
+        # recipe_df['ingredient_ids'].map(
+        #     lambda s : self.id_strings_to_padded_id_tensor(s, padding=max_len)
+        # )
         return recipe_df
 
     def split_data(self, recipe_dataset):
