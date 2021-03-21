@@ -11,20 +11,33 @@ class RecipeDataset(torch.utils.data.TensorDataset):
     def __init__(self, dataframe):
         super().__init__()
         # self.length = len(dataframe)
-        # self.data = dataframe
-        ingredient_tensor = dataframe['ingredient_ids'].map(
-            id_strings_to_id_tensor
-        )
+        self.data = self.dataframe_to_tensor(dataframe)
 
     def __len__(self):
         return self.length
 
+    @classmethod
+    def dataframe_to_tensor(cls, dataframe):
+        ingredient_data = dataframe['ingredient_ids'].map(id_string_to_tensor)
+        ingredient_data = torch.nn.utils.rnn.pad_sequence(ingredient_data)
+        print(ingredient_data.shape)
+        return ingredient_data
+
+    @staticmethod
+    def id_string_to_tensor(s: str, padding: int):
+        '''
+        Converts stirng of ids to tensor.
+        # NOTE: currently doesnt pad.
+        '''
+        # convert string to int list
+        ids = list(map(int, re.findall('\d+(?=[,\]])', s)))
+        # cast int list as tensor
+        ids = torch.tensor(ids, dtype=torch.int16)
+        return ids
+
     def __getitem__(self, key):
         # grab row at index
-        row = self.data.loc[key]
-        # get ingredient sequence
-        ingredients = id_strings_to_id_tensor(row['ingredient_ids'])
-        # cast data segment as tensor
+        ingredients =
         return ingredients
 
 
@@ -97,7 +110,7 @@ class RecipeDataModule(LightningDataModule):
         max_len = recipe_df['ingredient_ids'].str.len().max()
         # convert ingredient_ids to tensor
         recipe_df['ingredient_ids'].map(
-            lambda s : self.id_strings_to_id_tensor(s, padding=max_len)
+            lambda s : self.id_strings_to_padded_id_tensor(s, padding=max_len)
         )
         return recipe_df
 
@@ -114,16 +127,9 @@ class RecipeDataModule(LightningDataModule):
         val_data = val_data.reset_index()
         test_data = test_data.reset_index()
         # cast as torch datasets
-        # train_data = RecipeDataset(train_data)
-        # val_data = RecipeDataset(val_data)
-        # test_data = RecipeDataset(test_data)
-        import matplotlib.pyplot as plt
-        for n, data in {'train_data': train_data, 'val_data': val_data, 'test_data': test_data}.items():
-            series = data['ingredient_ids'].map(lambda x: len(x))
-            plt.hist(series)
-            plt.title(n)
-            plt.show()
-        raise RuntimeError()
+        train_data = RecipeDataset(train_data)
+        val_data = RecipeDataset(val_data)
+        test_data = RecipeDataset(test_data)
         return (train_data, val_data, test_data)
 
     def prepare_ingr_map(self):
@@ -157,13 +163,3 @@ class RecipeDataModule(LightningDataModule):
 
     def test_dataloader(self):
         pass
-
-    # helpers
-    @staticmethod
-    def id_strings_to_padded_id_tensor(s: str, padding: int):
-        ''' Converts stirng of ids to tensor '''
-        # convert string to int list
-        ids = list(map(int, re.findall('\d+(?=[,\]])', s)))
-        # cast int list as tensor
-        ids = torch.tensor(ids, dtype=torch.int16)
-        return ids
