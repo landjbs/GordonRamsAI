@@ -158,7 +158,11 @@ class RecipeDataModule(LightningDataModule):
         )
 
     def val_dataloader(self):
-        pass
+        return torch.utils.data.DataLoader(
+            self.val_data, batch_size=self.batch_size
+        )
 
     def test_dataloader(self):
-        pass
+        return torch.utils.data.DataLoader(
+            self.test_data, batch_size=self.batch_size
+        )
