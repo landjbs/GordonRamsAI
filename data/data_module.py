@@ -46,11 +46,11 @@ class RecipeDataModule(LightningDataModule):
     DATA_ROOT_DIR = 'data/archive'
     PP_RECIPES_FILE = f'{DATA_ROOT_DIR}/PP_recipes.csv'
     INGR_MAP_FILE = f'{DATA_ROOT_DIR}/ingr_map.pkl'
-    ADDITIONAL_TOKENS = pd.DataFrame(
-        [
-            ['MASK', ], 
-        ]
-    )
+    ADDITIONAL_TOKENS = [
+        'MASK', # tokens for model to predict
+        'UNK',  # default for unknown tokens
+        '' 
+    ]
 
     def __init__(self, config):
         super().__init__()
