@@ -1,2 +1,8 @@
 datasets:
   name: recipe_dataset
+  recipes_path: data/archive/PP_recipes.csv
+  ingr_map_path: data/archive/ingr_map.pkl
+optimizer:
+  beta: 0.01
+  lr: 0.1
+  type: adam
