@@ -3,6 +3,7 @@ import torch
 import pickle
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from cached_property import cached_property
 from pytorch_lightning import LightningDataModule
 
@@ -45,6 +46,11 @@ class RecipeDataModule(LightningDataModule):
     DATA_ROOT_DIR = 'data/archive'
     PP_RECIPES_FILE = f'{DATA_ROOT_DIR}/PP_recipes.csv'
     INGR_MAP_FILE = f'{DATA_ROOT_DIR}/ingr_map.pkl'
+    ADDITIONAL_TOKENS = pd.DataFrame(
+        [
+            ['MASK', ], 
+        ]
+    )
 
     def __init__(self, config):
         super().__init__()
@@ -134,6 +140,9 @@ class RecipeDataModule(LightningDataModule):
     def prepare_ingr_map(self):
         with open(self.INGR_MAP_FILE, 'rb') as ingr_map_file:
             ingr_map = pickle.load(ingr_map_file)
+        # update with additional tokens
+        for i, x in enumerate(sorted(list(set(ingr_map['id'])))):
+            assert (i==x), (i,x)
         return ingr_map
 
     # setup
@@ -143,7 +152,7 @@ class RecipeDataModule(LightningDataModule):
     def setup(self):
         # load files
         recipe_dataset = self.prepare_recipe_dataset()
-        ingr_map = self.prepare_ingr_map()
+        self.ingr_map = self.prepare_ingr_map()
         # split and cache datasets
         (
             self.train_data,

@@ -3,6 +3,7 @@ from config import Config
 
 config = Config()
 x = RecipeDataModule(config)
-x.setup()
-for y in x.train_dataloader():
-    print(y)
+x.prepare_ingr_map()
+
+# for y in x.test_dataloader():
+    # print(y)

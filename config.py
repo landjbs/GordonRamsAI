@@ -5,8 +5,12 @@ class Config:
         self.train_frac = 0.7       # fraction of dataset to use for train
         self.val_frac = 0.2         # fraction of dataset to use for validation
         self.test_frac = 0.1        # fraction of dataset to use for testing
-        # model architecture
+        # data augmentation
         self.mask_frac = 0.1
+        # model architecture
+        self.d_model = 128
+        self.n_heads = 8
+        self.n_layers = 4       # # TODO: implement
         # setup
         # self.overwrite_kwargs()
         self.run_assertions()

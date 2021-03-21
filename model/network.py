@@ -1,8 +1,9 @@
 import torch
 import torch.nn as nn
+import pytorch_lightning as pl
 
 
-class Model(nn.Module):
+class Model(pl.LightningModule):
     def __init__(self, config):
         self.embedding = nn.Embedding(
             config.vocab_size, config.d_model
