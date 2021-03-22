@@ -68,7 +68,13 @@ class Trainer(pl.Trainer):
                 config.compute.precision if (config.compute.hardware != 'cpu')
                 else 32
             ),
-
+            # logging
+            logger=logger,
+            # profiler=config.profiler,
+            log_every_n_steps=config.steps.log_every,
+            val_check_interval=config.steps.val_every,
+            callbacks=callbacks,
+            resume_from_checkpoint=config.file.load_path
         )
 
 

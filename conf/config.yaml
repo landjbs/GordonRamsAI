@@ -4,12 +4,6 @@ datasets:
   recipes_path: ${datasets.root_dir}/PP_recipes.csv
   ingr_map_path: ${datasets.root_dir}/ingr_map.pkl
 
-train:
-  batch_size: 10
-  train_frac: 0.7
-  val_frac: 0.2
-  test_frac: 0.1
-
 model:
   d_model: 128
   nhead: 8
@@ -25,6 +19,16 @@ optimizer:
 compute:
   hardware: cpu
   precision: 32
+
+train:
+  batch_size: 10
+  train_frac: 0.7
+  val_frac: 0.2
+  test_frac: 0.1
+
+steps:
+  log_every: 10
+  val_every: 100
 
 file:
   log: False
