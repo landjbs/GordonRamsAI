@@ -20,9 +20,10 @@ optimizer:
 compute:
   hardware: cpu
   precision: 32
+  num_workers: 1
 
 train:
-  batch_size: 10
+  batch_size: 128
   train_frac: 0.7
   val_frac: 0.2
   test_frac: 0.1
@@ -33,6 +34,6 @@ steps:
 
 file:
   log: False
-  save_path: None
-  load_path: None
-  run_name: None
+  save_path: False
+  load_path: False
+  run_name: False

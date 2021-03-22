@@ -13,7 +13,7 @@ class Model(pl.LightningModule):
         self.lr = config.optimizer.lr
         self.beta = config.optimizer.beta
         # layers
-        self.embedding = nn.Embedding(vocab_size, d_model)
+        self.embedding = nn.Embedding(vocab_size, config.model.d_model)
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=config.model.d_model,
             nhead=config.model.nhead,
@@ -26,7 +26,7 @@ class Model(pl.LightningModule):
                 num_layers=config.model.num_layers,
                 # norm=
         )
-        self.decoder = nn.Linear(d_model, vocab_size)
+        self.decoder = nn.Linear(config.model.d_model, vocab_size)
         self.softmax = nn.Softmax(dim=(-1))
 
     def forward(self, X: torch.Tensor):
@@ -47,7 +47,7 @@ class Model(pl.LightningModule):
 
     # steps
     def training_step(self, batch: torch.Tensor, batch_idx: int):
-        print(self(batch))
+        print(self(batch).shape)
 
     def validation_step(self, batch: torch.Tensor, batch_idx: int):
         pass

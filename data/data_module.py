@@ -25,6 +25,7 @@ class RecipeDataModule(LightningDataModule):
         self.train_frac = config.train.train_frac
         self.val_frac = config.train.val_frac
         self.test_frac = config.train.test_frac
+        self.num_workers = config.compute.num_workers
 
     def __repr__(self):
         repr_data = ['batch_size']
@@ -118,21 +119,6 @@ class RecipeDataModule(LightningDataModule):
             recipe_dataset, lengths=[n_train, n_val, n_test]
         )
         return train_data, val_data, test_data
-        ####
-        # train_data = recipe_dataset.sample(frac=self.train_frac)
-        # remaining_data = recipe_dataset.drop(train_data.index)
-        # val_count = int(self.val_frac * len(recipe_dataset))
-        # val_data = remaining_data.sample(n=val_count)
-        # test_data = remaining_data.drop(val_data.index)
-        # # reset indecies to be 0 through len indexeds
-        # train_data = train_data.reset_index()
-        # val_data = val_data.reset_index()
-        # test_data = test_data.reset_index()
-        # # cast as torch datasets
-        # train_data = RecipeDataset(train_data)
-        # val_data = RecipeDataset(val_data)
-        # test_data = RecipeDataset(test_data)
-        # return (train_data, val_data, test_data)
 
     def prepare_ingr_map(self):
         with open(self.INGR_MAP_PATH, 'rb') as INGR_MAP_PATH:
@@ -160,7 +146,8 @@ class RecipeDataModule(LightningDataModule):
     # dataloaders
     def train_dataloader(self):
         return torch.utils.data.DataLoader(
-            self.train_data, batch_size=self.batch_size
+            self.train_data, batch_size=self.batch_size,
+            num_workers=self.num_workers
         )
 
     def val_dataloader(self):
