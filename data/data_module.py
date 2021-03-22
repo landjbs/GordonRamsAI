@@ -65,7 +65,7 @@ class RecipeDataModule(LightningDataModule):
         for i, name in enumerate(repr_data):
             if (i != 0):
                 s += ', '
-            s += f'{name}={getattr(self, name)}'
+            s += f'{name}={getattr(self, name)'
         return s + ')'
 
     # specs
@@ -105,6 +105,25 @@ class RecipeDataModule(LightningDataModule):
 
     def food_name_to_id(self, name):
         return self.ingr_name_to_id_map[id]
+
+    @classmethod
+    def dataframe_to_tensor(cls, dataframe):
+        ingredient_data = dataframe['ingredient_ids'].map(
+            cls.id_string_to_tensor
+        )
+        ingredient_data = torch.nn.utils.rnn.pad_sequence(
+            ingredient_data,  batch_first=True
+        )
+        return ingredient_data
+
+    @staticmethod
+    def id_string_to_tensor(s: str):
+        ''' Converts string of ids to tensor. '''
+        # convert string to int list
+        ids = list(map(int, re.findall('\d+(?=[,\]])', s)))
+        # cast int list as tensor
+        ids = torch.tensor(ids, dtype=torch.int16)
+        return ids
 
     # preparation
     def prepare_recipe_dataset(self):
