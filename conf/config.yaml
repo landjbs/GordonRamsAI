@@ -10,7 +10,7 @@ train:
   val_frac: 0.2
   test_frac: 0.1
 
-architecture:
+model:
   d_model: 128
   n_heads: 8
 

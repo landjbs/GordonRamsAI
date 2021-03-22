@@ -4,14 +4,14 @@ import pytorch_lightning as pl
 
 
 class Model(pl.LightningModule):
-    def __init__(self, config):
+    def __init__(self, config, vocab_size: int):
         self.embedding = nn.Embedding(
-            config.vocab_size, config.d_model
+            vocab_size, config.model.d_model
         )
         self.transformer = nn.Transformer(
-            d_model=config.d_model,
-            n_heads=config.n_heads
-            dim_feedforward=(2*config.d_model)
+            d_model=config.model.d_model,
+            n_heads=config.model.n_heads
+            dim_feedforward=(2*config.model.d_model)
         )
         self.decoder = nn.Linear(config.d_model, config.vocab_size)
         self.softmax = nn.Softmax(dim=(-1))
