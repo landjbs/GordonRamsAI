@@ -9,10 +9,12 @@ from pytorch_lightning import LightningDataModule
 
 
 class RecipeDataModule(LightningDataModule):
+    CLS_TOKEN = '[CLS]' # token for start of a sequence
+    SEP_TOKEN = '[SEP]' # token for seperating two sequences
     MASK_TOKEN = '[MASK]' # tokens for model to predict
     UNK_TOKEN = '[UNK]' # default for unknown tokens
     PAD_TOKEN = '[PAD]'  # token for padding in sequence
-    SPECIAL_TOKENS = [MASK_TOKEN, UNK_TOKEN, PAD_TOKEN]
+    SPECIAL_TOKENS = [CLS_TOKEN, SEP_TOKEN, MASK_TOKEN, UNK_TOKEN, PAD_TOKEN]
 
     def __init__(self, config):
         super().__init__()
@@ -25,6 +27,10 @@ class RecipeDataModule(LightningDataModule):
         self.val_frac = config.train.val_frac
         self.test_frac = config.train.test_frac
         self.num_workers = config.compute.num_workers
+        # masking
+        self.frac_augmented = config.masking.frac_augmented
+        self.frac_masked = config.masking.frac_masked
+        self.frac_random = config.masking.frac_random
 
     def __repr__(self):
         repr_data = ['batch_size']
