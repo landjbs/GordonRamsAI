@@ -7,8 +7,8 @@ datasets:
 masking:
   frac_augmented: 0.15 # fraction of tokens to mask
   frac_masked: 0.8 # fraction of augmented tokens to set to MASK
-  frac_to_random: 0.1 # fraction of augmented tokens to set to random token
-  frac_to_unchanged: 0.1 # fraction of augmented tokens to keep the same
+  frac_random: 0.1 # fraction of augmented tokens to set to random token
+  frac_unchanged: 0.1 # fraction of augmented tokens to keep the same
 
 model:
   d_model: 128 # dimensionality of model features
@@ -21,7 +21,7 @@ optimizer:
   # beta: 0.01
   lr: 0.1 # learning rate of optimizer
   type: adam # type of optimizer
-  grad_clip: False # gradient clipping 
+  grad_clip: False # gradient clipping
 
 compute:
   hardware: cpu

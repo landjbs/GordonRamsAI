@@ -31,6 +31,7 @@ class RecipeDataModule(LightningDataModule):
         self.frac_augmented = config.masking.frac_augmented
         self.frac_masked = config.masking.frac_masked
         self.frac_random = config.masking.frac_random
+        self.frac_unchanged = config.masking.frac_unchanged
 
     def __repr__(self):
         repr_data = ['batch_size']
@@ -106,7 +107,11 @@ class RecipeDataModule(LightningDataModule):
     # preparation
     def mask_ingredient_tensor(self, data):
         ''' '''
-
+        return data
+        # select indecies for augmentation in each sequence
+        # determine and apply type of augmentation
+        # add cls tokens to the start of each sequence
+        # data =
 
     def prepare_recipe_dataset(self):
         # load dataframe
@@ -136,7 +141,7 @@ class RecipeDataModule(LightningDataModule):
         )
         return train_data, val_data, test_data
 
-    def prepare_ingr_map(self):
+    def prepare_ingr_map(self) -> pd.DataFrame:
         with open(self.INGR_MAP_PATH, 'rb') as INGR_MAP_PATH:
             ingr_map = pickle.load(INGR_MAP_PATH)
         # update with additional tokens

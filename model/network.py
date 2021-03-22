@@ -3,15 +3,19 @@ import torch.nn as nn
 import pytorch_lightning as pl
 from omegaconf import DictConfig
 
+from data import RecipeDataModule
+
 
 class Model(pl.LightningModule):
     ''' '''
 
-    def __init__(self, config: DictConfig, vocab_size: int):
+    def __init__(self, config: DictConfig):
         super().__init__()
         # hparams
         self.lr = config.optimizer.lr
         self.beta = config.optimizer.beta
+        # build data module
+        self.data_module = RecipeDataModule(config)
         # layers
         self.embedding = nn.Embedding(vocab_size, config.model.d_model)
         encoder_layer = nn.TransformerEncoderLayer(
