@@ -65,7 +65,7 @@ class RecipeDataModule(LightningDataModule):
         for i, name in enumerate(repr_data):
             if (i != 0):
                 s += ', '
-            s += f'{name}={getattr(self, name)'
+            s += f'{name}={getattr(self, name)}'
         return s + ')'
 
     # specs
@@ -136,31 +136,38 @@ class RecipeDataModule(LightningDataModule):
                 'name_tokens', 'i', 'ingredient_tokens'
             ]
         )
-        # length of longest recipe to use for padding
-        # max_len = recipe_df['ingredient_ids'].str.len().max()
         # convert ingredient_ids to tensor
-        # recipe_df['ingredient_ids'].map(
-        #     lambda s : self.id_strings_to_padded_id_tensor(s, padding=max_len)
-        # )
-        return recipe_df
+        recipe_data = self.dataframe_to_tensor(recipe_df)
+        return recipe_data
 
-    def split_data(self, recipe_dataset):
-        ''' split training data '''
+    def split_data(self, recipe_dataset: torch.Tensor):
+        ''' Split training data into train/val/test tensors '''
+        n = recipe_dataset.size(0)
+        train_data, val_data, test_data = torch.utils.data.random_split(
+            recipe_dataset,
+            lengths=[
+                (self.train_frac*n),
+                (self.val_frac*n),
+                (self.test_frac*n)
+            ]
+        )
+        return train_data, val_data, test_data
+
         ####
-        train_data = recipe_dataset.sample(frac=self.train_frac)
-        remaining_data = recipe_dataset.drop(train_data.index)
-        val_count = int(self.val_frac * len(recipe_dataset))
-        val_data = remaining_data.sample(n=val_count)
-        test_data = remaining_data.drop(val_data.index)
-        # reset indecies to be 0 through len indexeds
-        train_data = train_data.reset_index()
-        val_data = val_data.reset_index()
-        test_data = test_data.reset_index()
-        # cast as torch datasets
-        train_data = RecipeDataset(train_data)
-        val_data = RecipeDataset(val_data)
-        test_data = RecipeDataset(test_data)
-        return (train_data, val_data, test_data)
+        # train_data = recipe_dataset.sample(frac=self.train_frac)
+        # remaining_data = recipe_dataset.drop(train_data.index)
+        # val_count = int(self.val_frac * len(recipe_dataset))
+        # val_data = remaining_data.sample(n=val_count)
+        # test_data = remaining_data.drop(val_data.index)
+        # # reset indecies to be 0 through len indexeds
+        # train_data = train_data.reset_index()
+        # val_data = val_data.reset_index()
+        # test_data = test_data.reset_index()
+        # # cast as torch datasets
+        # train_data = RecipeDataset(train_data)
+        # val_data = RecipeDataset(val_data)
+        # test_data = RecipeDataset(test_data)
+        # return (train_data, val_data, test_data)
 
     def prepare_ingr_map(self):
         with open(self.INGR_MAP_PATH, 'rb') as INGR_MAP_PATH:
