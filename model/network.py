@@ -17,14 +17,14 @@ class Model(pl.LightningModule):
         self.transformer = nn.Transformer(
             d_model=d_model,
             dim_feedforward=(2*d_model),
-            nhead=config.model.n_heads,
-            num_encoder_layers=config.model.num_encoder_layers
+            nhead=config.model.nhead,
+            num_encoder_layers=config.model.num_encoder_layers,
             num_decoder_layers=config.model.num_decoder_layers
         )
         self.decoder = nn.Linear(d_model, vocab_size)
         self.softmax = nn.Softmax(dim=(-1))
 
-    def forward(self, X: torch.Tensor, M: torch.Tensor):
+    def forward(self, X: torch.Tensor):
         ''' '''
         E = self.embedding(X)
         E = self.transformer(E)
