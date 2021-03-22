@@ -58,3 +58,13 @@ class Model(pl.LightningModule):
 
     def test_step(self, batch: torch.Tensor, batch_idx: int):
         pass
+
+    # data loaders
+    def train_dataloader(self):
+        return self.data_module.train_dataloader()
+
+    def val_dataloader(self):
+        return self.data_module.val_dataloader()
+
+    def test_dataloader(self):
+        return self.data_module.test_dataloader()

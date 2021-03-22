@@ -28,18 +28,17 @@ def train(config: DictConfig, **kwargs) -> None:
     # set seeds
     seed_everything(0)
     # build data module
-    data_module = RecipeDataModule(config)
-    data_module.setup()
+    # data_module = RecipeDataModule(config)
+    # data_module.setup()
     # build model
     model = Model(config, data_module.vocab_size)
     # build trainer
     trainer = Trainer.from_config(config)
     # run training loop
-    trainer.fit(
-        model,
-        train_dataloader=data_module.train_dataloader(),
-        val_dataloaders=data_module.val_dataloader()
-    )
+    trainer.fit(model)
+        # train_dataloader=data_module.train_dataloader(),
+        # val_dataloaders=data_module.val_dataloader()
+    # )
 
 
 
