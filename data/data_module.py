@@ -143,13 +143,12 @@ class RecipeDataModule(LightningDataModule):
     def split_data(self, recipe_dataset: torch.Tensor):
         ''' Split training data into train/val/test tensors '''
         n = recipe_dataset.size(0)
+        # determine sizes
+        n_train = self.train_frac * n
+        n_val = self.val_frac * n
+        n_test = n - (n_train + n_val)
         train_data, val_data, test_data = torch.utils.data.random_split(
-            recipe_dataset,
-            lengths=[
-                (self.train_frac*n),
-                (self.val_frac*n),
-                (self.test_frac*n)
-            ]
+            recipe_dataset, lengths=[n_train, n_val, n_test]
         )
         return train_data, val_data, test_data
 
