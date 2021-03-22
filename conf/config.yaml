@@ -20,11 +20,14 @@ optimizer:
   beta: 0.01
   lr: 0.1
   type: adam
+  grad_clip: False
 
 compute:
   hardware: cpu
   precision: 32
 
 file:
+  log: False
   save_path: None
   load_path: None
+  run_name: None
