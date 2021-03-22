@@ -1,0 +1,31 @@
+datasets:
+  name: recipe_dataset
+  root_dir: data/archive
+  recipes_path: ${datasets.root_dir}/PP_recipes.csv
+  ingr_map_path: ${datasets.root_dir}/ingr_map.pkl
+model:
+  d_model: 128
+  nhead: 8
+  num_encoder_layers: 4
+  num_decoder_layers: 4
+optimizer:
+  beta: 0.01
+  lr: 0.1
+  type: adam
+  grad_clip: false
+compute:
+  hardware: cpu
+  precision: 32
+train:
+  batch_size: 10
+  train_frac: 0.7
+  val_frac: 0.2
+  test_frac: 0.1
+steps:
+  log_every: 10
+  val_every: 100
+file:
+  log: false
+  save_path: None
+  load_path: None
+  run_name: None

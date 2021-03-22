@@ -1,3 +1,7 @@
+import pytorch_lightning as pl
+from omegaconf import DictConfig
+
+
 class Trainer(pl.Trainer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -40,7 +44,7 @@ class Trainer(pl.Trainer):
             ),
             # compute
             auto_select_gpus=(
-                True if (config.hardware in ('auto', 'gpu')) else False
+                True if (config.compute.hardware in ('auto', 'gpu')) else False
             ),
             precision=(
                 config.compute.precision if (config.compute.hardware != 'cpu')
