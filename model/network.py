@@ -4,16 +4,24 @@ import pytorch_lightning as pl
 
 
 class Model(pl.LightningModule):
+    ''' '''
+
     def __init__(self, config, vocab_size: int):
+        super().__init__()
+        # dims
+        d_model = config.model.d_model
+        # layers
         self.embedding = nn.Embedding(
-            vocab_size, config.model.d_model
+            vocab_size, d_model
         )
         self.transformer = nn.Transformer(
-            d_model=config.model.d_model,
-            n_heads=config.model.n_heads
-            dim_feedforward=(2*config.model.d_model)
+            d_model=d_model,
+            dim_feedforward=(2*d_model),
+            nhead=config.model.n_heads,
+            num_encoder_layers=config.model.num_encoder_layers
+            num_decoder_layers=config.model.num_decoder_layers
         )
-        self.decoder = nn.Linear(config.d_model, config.vocab_size)
+        self.decoder = nn.Linear(d_model, vocab_size)
         self.softmax = nn.Softmax(dim=(-1))
 
     def forward(self, X: torch.Tensor, M: torch.Tensor):

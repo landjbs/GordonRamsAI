@@ -70,7 +70,7 @@ class RecipeDataModule(LightningDataModule):
 
     # specs
     @cached_property
-    def num_ingredients(self):
+    def vocab_size(self):
         ''' Number of unique ingredients in dataset '''
         return len(self.ingr_id_to_name_map)
 

@@ -9,10 +9,10 @@ from model import Model
 @hydra.main(config_name='conf/config')
 def test_config(config: DictConfig):
     os.chdir(hydra.utils.get_original_cwd())
-    x = RecipeDataModule(config)
-    x.setup()
-    model = Model(config)
+    model = Model(config, 1) #data.vocab_size)
     print(model)
+    data = RecipeDataModule(config)
+    data.setup()
 
 
 if __name__ == '__main__':
