@@ -9,11 +9,10 @@ from pytorch_lightning import LightningDataModule
 
 
 class RecipeDataModule(LightningDataModule):
-    ADDITIONAL_TOKENS = [
-        'MASK', # tokens for model to predict
-        'UNK',  # default for unknown tokens
-        'PAD',   # token for padding in sequence
-    ]
+    MASK_TOKEN = '[MASK]' # tokens for model to predict
+    UNK_TOKEN = '[UNK]' # default for unknown tokens
+    PAD_TOKEN = '[PAD]'  # token for padding in sequence
+    SPECIAL_TOKENS = [MASK_TOKEN, UNK_TOKEN, PAD_TOKEN]
 
     def __init__(self, config):
         super().__init__()
