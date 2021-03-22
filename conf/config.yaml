@@ -7,21 +7,21 @@ datasets:
 masking:
   frac_augmented: 0.15 # fraction of tokens to mask
   frac_masked: 0.8 # fraction of augmented tokens to set to MASK
-  frac_to_random: 0.2 # fraction of augmented tokens to set to random token
-  # frac_to_same: 0.10 # fraction of augmented
+  frac_to_random: 0.1 # fraction of augmented tokens to set to random token
+  frac_to_unchanged: 0.1 # fraction of augmented tokens to keep the same
 
 model:
-  d_model: 128
-  nhead: 8
-  num_layers: 4
-  dropout: 0.1
-  activation: relu
+  d_model: 128 # dimensionality of model features
+  nhead: 8 # number of attentions heads per layer
+  num_layers: 4 # number of self-attention layers in transformer
+  dropout: 0.1 # dropout fraction in FFN at each layer
+  activation: relu # activation in FFN at each layer
 
 optimizer:
-  beta: 0.01
-  lr: 0.1
-  type: adam
-  grad_clip: False
+  # beta: 0.01
+  lr: 0.1 # learning rate of optimizer
+  type: adam # type of optimizer
+  grad_clip: False # gradient clipping 
 
 compute:
   hardware: cpu
