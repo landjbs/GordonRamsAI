@@ -18,13 +18,6 @@ class Model(pl.LightningModule):
         self.embedding = nn.Embedding(
             vocab_size, d_model
         )
-        # self.transformer = nn.Transformer(
-        #     d_model=d_model,
-        #     dim_feedforward=(2*d_model),
-        #     nhead=config.model.nhead,
-        #     num_encoder_layers=config.model.num_encoder_layers,
-        #     num_decoder_layers=config.model.num_decoder_layers
-        # )
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=d_model,
             nhead=config.model.nhead,
@@ -32,7 +25,11 @@ class Model(pl.LightningModule):
             dropout=config.model.dropout,
             activation=config.model.activation
         )
-
+        self.encoder = nn.TransformerEncoder(
+                encoder_layer=encoder_layer,
+                num_layers=config.model.num_layers,
+                norm=
+        )
         self.decoder = nn.Linear(d_model, vocab_size)
         self.softmax = nn.Softmax(dim=(-1))
 
