@@ -31,7 +31,7 @@ def train(config: DictConfig, **kwargs) -> None:
     data_module = RecipeDataModule(config)
     data_module.setup()
     # build model
-    model = Model(config, 1)
+    model = Model(config, data_module.vocab_size)
     # build trainer
     trainer = Trainer.from_config(config)
     # run training loop

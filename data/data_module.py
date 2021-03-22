@@ -89,7 +89,7 @@ class RecipeDataModule(LightningDataModule):
         # convert string to int list
         ids = list(map(int, re.findall('\d+(?=[,\]])', s)))
         # cast int list as tensor
-        ids = torch.tensor(ids, dtype=torch.int16)
+        ids = torch.tensor(ids) # , dtype=torch.int16
         return ids
 
     # preparation

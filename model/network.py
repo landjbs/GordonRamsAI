@@ -7,7 +7,7 @@ from omegaconf import DictConfig
 class Model(pl.LightningModule):
     ''' '''
 
-    def __init__(self, config, vocab_size: int):
+    def __init__(self, config: DictConfig, vocab_size: int):
         super().__init__()
         # hparams
         self.lr = config.optimizer.lr
@@ -18,13 +18,21 @@ class Model(pl.LightningModule):
         self.embedding = nn.Embedding(
             vocab_size, d_model
         )
-        self.transformer = nn.Transformer(
+        # self.transformer = nn.Transformer(
+        #     d_model=d_model,
+        #     dim_feedforward=(2*d_model),
+        #     nhead=config.model.nhead,
+        #     num_encoder_layers=config.model.num_encoder_layers,
+        #     num_decoder_layers=config.model.num_decoder_layers
+        # )
+        encoder_layer = nn.TransformerEncoderLayer(
             d_model=d_model,
-            dim_feedforward=(2*d_model),
             nhead=config.model.nhead,
-            num_encoder_layers=config.model.num_encoder_layers,
-            num_decoder_layers=config.model.num_decoder_layers
+            dim_feedforward=(2*d_model),
+            dropout=config.model.dropout,
+            activation=config.model.activation
         )
+
         self.decoder = nn.Linear(d_model, vocab_size)
         self.softmax = nn.Softmax(dim=(-1))
 
@@ -33,7 +41,7 @@ class Model(pl.LightningModule):
         return torch.optim.Adam(
             params=self.parameters(),
             lr=self.lr,
-            betas=(self.beta)
+            # betas=(self.beta,) # TODO: implement
         )
 
     #
@@ -49,8 +57,8 @@ class Model(pl.LightningModule):
     def training_step(self, batch: torch.Tensor, batch_idx: int):
         self(batch)
 
+    def validation_step(self, batch: torch.Tensor, batch_idx: int):
+        pass
 
-
-    # def init_params(self):
-        # for n, p in self.named_parameters():
-            # nn.init.xavier_uniform_(p)
+    def test_step(self, batch: torch.Tensor, batch_idx: int):
+        pass
