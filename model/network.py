@@ -12,26 +12,30 @@ class Model(pl.LightningModule):
         # hparams
         self.lr = config.optimizer.lr
         self.beta = config.optimizer.beta
-        # dims
-        d_model = config.model.d_model
         # layers
-        self.embedding = nn.Embedding(
-            vocab_size, d_model
-        )
+        self.embedding = nn.Embedding(vocab_size, d_model)
         encoder_layer = nn.TransformerEncoderLayer(
-            d_model=d_model,
+            d_model=config.model.d_model,
             nhead=config.model.nhead,
-            dim_feedforward=(2*d_model),
+            dim_feedforward=(2 * config.model.d_model),
             dropout=config.model.dropout,
             activation=config.model.activation
         )
         self.encoder = nn.TransformerEncoder(
                 encoder_layer=encoder_layer,
                 num_layers=config.model.num_layers,
-                norm=
+                # norm=
         )
         self.decoder = nn.Linear(d_model, vocab_size)
         self.softmax = nn.Softmax(dim=(-1))
+
+    def forward(self, X: torch.Tensor):
+        ''' '''
+        E = self.embedding(X)
+        E = self.encoder(E)
+        logits = self.decoder(E)
+        pi = self.softmax(logits)
+        return logits
 
     # configuration
     def configure_optimizers(self):
@@ -41,18 +45,9 @@ class Model(pl.LightningModule):
             # betas=(self.beta,) # TODO: implement
         )
 
-    #
-    def forward(self, X: torch.Tensor):
-        ''' '''
-        E = self.embedding(X)
-        E = self.transformer(E)
-        logits = self.decoder(E)
-        pi = self.softmax(logits)
-        return logits
-
     # steps
     def training_step(self, batch: torch.Tensor, batch_idx: int):
-        self(batch)
+        print(self(batch))
 
     def validation_step(self, batch: torch.Tensor, batch_idx: int):
         pass
