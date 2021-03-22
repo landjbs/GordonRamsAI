@@ -1,3 +1,4 @@
+import os
 import hydra
 from omegaconf import DictConfig, OmegaConf
 
@@ -7,10 +8,10 @@ from config import Config
 
 @hydra.main(config_name='conf/config')
 def test_config(config: DictConfig):
+    os.chdir(hydra.utils.get_original_cwd())
     x = RecipeDataModule(config)
-    x.prepare_ingr_map()
-    for y in x.test_dataloader():
-        print(y)
+    x.setup()
+    print(x)
 
 
 if __name__ == '__main__':

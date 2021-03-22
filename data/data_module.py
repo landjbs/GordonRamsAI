@@ -42,10 +42,6 @@ class RecipeDataset(torch.utils.data.TensorDataset):
 
 
 class RecipeDataModule(LightningDataModule):
-    # data files
-    # DATA_ROOT_DIR = 'data/archive'
-    # RECIPIES_PATH = f'{DATA_ROOT_DIR}/PP_recipes.csv'
-    # INGR_MAP_PATH = f'{DATA_ROOT_DIR}/ingr_map.pkl'
     # ADDITIONAL_TOKENS = [
         # 'MASK', # tokens for model to predict
         # 'UNK',  # default for unknown tokens
@@ -64,7 +60,13 @@ class RecipeDataModule(LightningDataModule):
         self.test_frac = config.train.test_frac
 
     def __repr__(self):
-        return 'Recipe_Dataset()'
+        repr_data = ['batch_size']
+        s = 'Recipe_Dataset('
+        for i, name in enumerate(repr_data):
+            if (i != 0):
+                s += ', '
+            s += f'{name}={getattr(self, name)}'
+        return s + ')'
 
     # specs
     @cached_property
