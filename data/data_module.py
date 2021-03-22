@@ -69,9 +69,18 @@ class RecipeDataModule(LightningDataModule):
             raise RuntimeError(
                 'Must load ingr_map before calling ingr_name_to_id_map.'
             )
-        return {
+        # build ingr_name_to_id_map from ingr_map dataframe
+        ingr_name_to_id_map = {
             row['replaced'] : row['id'] for _, row in self.ingr_map.iterrows()
         }
+        # get ids for special tokens
+        special_ids = range(row['id']+1, len(self.SPECIAL_TOKENS))
+        # add special tokens to map
+        ingr_name_to_id_map.update(
+            {id : token for id, token in zip(special_ids, self.SPECIAL_TOKENS)}
+        )
+        return ingr_name_to_id_map
+
 
     def food_id_to_name(self, id):
         return self.ingr_id_to_name_map[id]
@@ -99,6 +108,8 @@ class RecipeDataModule(LightningDataModule):
         return ids
 
     # preparation
+    def mask_ingredient_tensor(self, ):
+
     def prepare_recipe_dataset(self):
         # load dataframe
         recipe_df = pd.read_csv(self.RECIPIES_PATH)
