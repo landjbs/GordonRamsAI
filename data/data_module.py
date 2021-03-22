@@ -43,21 +43,25 @@ class RecipeDataset(torch.utils.data.TensorDataset):
 
 class RecipeDataModule(LightningDataModule):
     # data files
-    DATA_ROOT_DIR = 'data/archive'
-    PP_RECIPES_FILE = f'{DATA_ROOT_DIR}/PP_recipes.csv'
-    INGR_MAP_FILE = f'{DATA_ROOT_DIR}/ingr_map.pkl'
-    ADDITIONAL_TOKENS = [
-        'MASK', # tokens for model to predict
-        'UNK',  # default for unknown tokens
-        '' 
-    ]
+    # DATA_ROOT_DIR = 'data/archive'
+    # RECIPIES_PATH = f'{DATA_ROOT_DIR}/PP_recipes.csv'
+    # INGR_MAP_PATH = f'{DATA_ROOT_DIR}/ingr_map.pkl'
+    # ADDITIONAL_TOKENS = [
+        # 'MASK', # tokens for model to predict
+        # 'UNK',  # default for unknown tokens
+        # ''
+    # ]
 
     def __init__(self, config):
         super().__init__()
-        self.batch_size = config.batch_size
-        self.train_frac = config.train_frac
-        self.val_frac = config.val_frac
-        self.test_frac = config.test_frac
+        # datasets
+        self.RECIPIES_PATH = config.datasets.recipes_path
+        self.INGR_MAP_PATH = config.datasets.ingr_map_path
+        # train
+        self.batch_size = config.train.batch_size
+        self.train_frac = config.train.train_frac
+        self.val_frac = config.train.val_frac
+        self.test_frac = config.train.test_frac
 
     def __repr__(self):
         return 'Recipe_Dataset()'
@@ -103,7 +107,7 @@ class RecipeDataModule(LightningDataModule):
     # preparation
     def prepare_recipe_dataset(self):
         # load dataframe
-        recipe_df = pd.read_csv(self.PP_RECIPES_FILE)
+        recipe_df = pd.read_csv(self.RECIPIES_PATH)
         # remove unnecessary columns
         recipe_df = recipe_df.drop(
             columns=[
@@ -138,8 +142,8 @@ class RecipeDataModule(LightningDataModule):
         return (train_data, val_data, test_data)
 
     def prepare_ingr_map(self):
-        with open(self.INGR_MAP_FILE, 'rb') as ingr_map_file:
-            ingr_map = pickle.load(ingr_map_file)
+        with open(self.INGR_MAP_PATH, 'rb') as INGR_MAP_PATH:
+            ingr_map = pickle.load(INGR_MAP_PATH)
         # update with additional tokens
         for i, x in enumerate(sorted(list(set(ingr_map['id'])))):
             assert (i==x), (i,x)

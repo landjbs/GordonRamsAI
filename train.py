@@ -7,13 +7,11 @@ from config import Config
 
 @hydra.main(config_name='conf/config')
 def test_config(config: DictConfig):
-    print(OmegaConf.to_yaml(config))
+    x = RecipeDataModule(config)
+    x.prepare_ingr_map()
+    for y in x.test_dataloader():
+        print(y)
 
-test_config()
 
-# config = Config()
-# x = RecipeDataModule(config)
-# x.prepare_ingr_map()
-
-# for y in x.test_dataloader():
-    # print(y)
+if __name__ == '__main__':
+    test_config()
