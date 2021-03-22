@@ -8,45 +8,12 @@ from cached_property import cached_property
 from pytorch_lightning import LightningDataModule
 
 
-# class RecipeDataset(torch.utils.data.TensorDataset):
-#     def __init__(self, dataframe):
-#         super().__init__()
-#         self.data = self.dataframe_to_tensor(dataframe)
-#
-#     def __len__(self):
-#         return self.data.size(0)
-#
-#     @classmethod
-#     def dataframe_to_tensor(cls, dataframe):
-#         ingredient_data = dataframe['ingredient_ids'].map(
-#             cls.id_string_to_tensor
-#         )
-#         ingredient_data = torch.nn.utils.rnn.pad_sequence(
-#             ingredient_data,  batch_first=True
-#         )
-#         return ingredient_data
-#
-#     @staticmethod
-#     def id_string_to_tensor(s: str):
-#         ''' Converts string of ids to tensor. '''
-#         # convert string to int list
-#         ids = list(map(int, re.findall('\d+(?=[,\]])', s)))
-#         # cast int list as tensor
-#         ids = torch.tensor(ids, dtype=torch.int16)
-#         return ids
-#
-#     def __getitem__(self, key):
-#         # grab row at index
-#         ingredients = self.data[key]
-#         return ingredients
-
-
 class RecipeDataModule(LightningDataModule):
-    # ADDITIONAL_TOKENS = [
-        # 'MASK', # tokens for model to predict
-        # 'UNK',  # default for unknown tokens
-        # ''
-    # ]
+    ADDITIONAL_TOKENS = [
+        'MASK', # tokens for model to predict
+        'UNK',  # default for unknown tokens
+        'PAD',   # token for padding in sequence
+    ]
 
     def __init__(self, config):
         super().__init__()
