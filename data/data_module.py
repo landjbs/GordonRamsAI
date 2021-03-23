@@ -1,3 +1,5 @@
+from typing import Union
+
 import re
 import torch
 import pickle
@@ -60,7 +62,7 @@ class RecipeDataModule(LightningDataModule):
     # converters
     @cached_property
     def ingr_id_to_name_map(self):
-        return {name : id for name, id in self.ingr_name_to_id_map.items()}
+        return {id : name for name, id in self.ingr_name_to_id_map.items()}
 
     @cached_property
     def ingr_name_to_id_map(self):
@@ -86,10 +88,10 @@ class RecipeDataModule(LightningDataModule):
         return ingr_name_to_id_map
 
 
-    def food_id_to_name(self, id):
-        return self.ingr_id_to_name_map[id]
+    def food_id_to_name(self, id: Union[int, torch.Tensor]):
+        return self.ingr_id_to_name_map[int(id)]
 
-    def food_name_to_id(self, name):
+    def food_name_to_id(self, name: str):
         return self.ingr_name_to_id_map[id]
 
     def dataframe_to_tensor(self, dataframe):
@@ -109,6 +111,18 @@ class RecipeDataModule(LightningDataModule):
         # cast int list as tensor
         ids = torch.tensor(ids) # , dtype=torch.int16
         return ids
+
+    def translate(self, tensor: torch.Tensor) -> str:
+        ''' Translates tensor into string of ingredients '''
+        # TODO: allow different dims of tensor
+        # OPTIMIZE: this obviously
+        f = lambda x : str(self.food_id_to_name(int(x)))
+        if ((t_dim := tensor.dim()) == 1):
+            return ', '.join(map(f, tensor))
+        elif (t_dim == 2):
+            raise NotImplementedError()
+        else:
+            raise ValueError('Invalid dims for translated tensor.')
 
     # preparation
     def mask_ingredient_tensor(self, data):

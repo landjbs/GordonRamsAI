@@ -16,6 +16,7 @@ class Model(pl.LightningModule):
         super().__init__()
         # hparams
         self.lr = config.optimizer.lr
+        self.config = config
         # self.beta = config.optimizer.beta
         # masking
         self.frac_augmented = config.masking.frac_augmented
@@ -145,7 +146,7 @@ class Model(pl.LightningModule):
         loss = self.cross_entropy(preds.flatten(0, 1), targets.flatten())
         # log
         if self.file:
-            self.log('Metrics/Loss', loss.detach())
+            self.log('Train/Loss', loss.detach())
         return loss
 
     def validation_step(self, batch: torch.Tensor, batch_idx: int):
@@ -156,11 +157,20 @@ class Model(pl.LightningModule):
             preds = self(batch, pad_mask)
             # [(b * n) x v], [(b * n)] | calculate loss
             loss = self.cross_entropy(preds.flatten(0, 1), targets.flatten())
-            # log
-            
+            # log metrics
+            self.log('Validation/Loss', loss.detach())
+            # analyze
+            # display some completions
+            translation = self.dataset.translate(batch[0])
+            self.logger.experiment.add_text('Completions', translation)
 
     def test_step(self, batch: torch.Tensor, batch_idx: int):
         pass
+
+    # setup
+    def on_train_start(self):
+        if self.file:
+            self.logger.experiment.add_text('Config', self.config.pretty())
 
     # data loaders
     def train_dataloader(self):
