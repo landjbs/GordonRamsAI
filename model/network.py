@@ -62,8 +62,6 @@ class Model(pl.LightningModule):
         preds = self.softmax(logits)
         return preds
 
-    # def loss(self, ):
-
     # configuration
     def configure_optimizers(self):
         return torch.optim.Adam(

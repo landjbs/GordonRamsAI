@@ -40,9 +40,17 @@ class RecipeDataModule(LightningDataModule):
 
     # specs
     @cached_property
+    def token_count(self):
+        '''
+        Number of unique tokens. Distinct from vocab_size in that it includes
+        special tokens in addition to ingredients.
+        '''
+        return len(self.ingr_name_to_id_map)
+
+    @cached_property
     def vocab_size(self):
         ''' Number of unique ingredients in dataset '''
-        return (len(self.ingr_id_to_name_map) - len(self.SPECIAL_TOKENS))
+        return (self.token_count - len(self.SPECIAL_TOKENS))
 
     @cached_property
     def num_recipes(self):
