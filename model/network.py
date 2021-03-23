@@ -74,6 +74,7 @@ class Model(pl.LightningModule):
         Args:
             batch:  [b x seqlen]
         '''
+        batch_shape = batch.size()
         # ---------------------- one way --------------------
         # IDEA: so we could do it this way where every sequence has ~15% masked
         # or we give every token a 15% probability of being masked. The former
@@ -85,12 +86,17 @@ class Model(pl.LightningModule):
         # n_augmented = (self.frac_augmented * seqlen).round()
         # print(f'n_augmented: {n_augmented}')
         # ---------------------- other way --------------------
-        augmentation_randomness = torch.rand(batch.size(), dtype=torch.float16)
-        is_augmented = torch.where(
-            condition=(augmentation_randomness > self.frac_augmented),
-            x=(batch != self.dataset.PAD_ID),
-            y=False
+        # [b x seqlen] | all tokens tagged for augmentation
+        is_augmented = (
+            (torch.rand(batch_shape) < self.frac_augmented)
+            & (batch != self.dataset.PAD_ID)
         )
+        # [b x seqlen] | select values to mask
+        is_masked = (
+            (torch.rand(batch_shape) < self.frac_masked)
+            & is_augmented
+        )
+        # [b x seqlen] | select values to
 
         raise RuntimeError()
 
