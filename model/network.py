@@ -9,7 +9,8 @@ from data import RecipeDataModule
 
 
 class Model(pl.LightningModule):
-    ''' '''
+    '''
+    '''
 
     def __init__(self, config: DictConfig):
         super().__init__()
@@ -59,21 +60,17 @@ class Model(pl.LightningModule):
         Forward pass through the network.
         Args:
             X:          Padded input sequence [b x n x d_m]
-            pad_mask:   Byte tensor denoting masked tokens [b x n]
+            pad_mask:   Binary tensor denoting masked tokens with True [b x n]
         Returns:
             preds:      Normalized prediction distribution for each token
                         [b x n x vocab_size]
         '''
-        print(X.shape)
         # [b x n] -> [b x n x d_m] | fetch embedding vectors of each id
         E = self.embedding(X)
-        print(E.shape)
-        print(pad_mask.shape)
-        # [b x n x d_m] -> [b x n x d_m] |
-        E = self.encoder(E, src_key_padding_mask=pad_mask)
-        raise RuntimeError()
-        # [b x n x d_m] -> [b x n x vocab_size] |
-        logits = self.decoder(E)
+        # [b x n x d_m] -> [n x b x d_m] |
+        E = self.encoder(E.transpose(1, 0), src_key_padding_mask=pad_mask)
+        # [n x b x d_m] -> [b x n x vocab_size] |
+        logits = self.decoder(E.transpose(1, 0))
         # [b x n x vocab_size] -> [b x n x vocab_size] |
         preds = self.softmax(logits)
         return preds
@@ -91,7 +88,7 @@ class Model(pl.LightningModule):
         '''
         Applies masking to batch.
         Args:
-            batch:  [b x seqlen]
+            batch:  [b x n]
         '''
         batch_shape = batch.size()
         # ---------------------- one way --------------------
@@ -100,25 +97,25 @@ class Model(pl.LightningModule):
         # is more conceptually favorable to me, but other way is easier and
         # appears in conventional implementations.
         # # [b] | get number of indecies to mask per sequence in batch
-        # seqlen = torch.where(batch!=self.dataset.PAD_ID, True, False).sum(1)
+        # n = torch.where(batch!=self.dataset.PAD_ID, True, False).sum(1)
         # # [b] | calc number of tokens to augment per sequence
-        # n_augmented = (self.frac_augmented * seqlen).round()
+        # n_augmented = (self.frac_augmented * n).round()
         # print(f'n_augmented: {n_augmented}')
         # ---------------------- other way --------------------
         # init target sequence for prediction
         targets = batch.clone()
         # mask for all padded tokens
         pad_mask = (batch == self.dataset.PAD_ID)
-        # [b x seqlen] | all tokens tagged for augmentation
+        # [b x n] | all tokens tagged for augmentation
         is_augmented = (
             (torch.rand(batch_shape) < self.frac_augmented)
             & ~pad_mask
         )
-        # [b x seqlen] | select values to mask
+        # [b x n] | select values to mask
         is_masked = (
             (torch.rand(batch_shape) < self.frac_masked) & is_augmented
         )
-        # [b x seqlen] | select values to randomize
+        # [b x n] | select values to randomize
         # WARNING: this is not yet the proper math to maintain actual ratios
         is_random = (
             (torch.rand(batch_shape) < self.frac_random)
@@ -142,11 +139,11 @@ class Model(pl.LightningModule):
         ''' '''
         # apply augmentations
         batch, targets, pad_mask = self.augment_batch(batch)
-        # get predictions
+        # [b x n x vocab_size] | get predictions
         preds = self(batch, pad_mask)
-        # calculate loss
-        loss = self.loss(preds, targets)
-        print(loss)
+        # [b x n x v] -> | reshape predictions for cross_entropy
+        # [(b * n) x v], [(b * n)] | calculate loss
+        loss = self.cross_entropy(preds.flatten(0, 1), targets.flatten())
         # # log
         # if self.file:
         #     pass
