@@ -22,11 +22,11 @@ class Model(pl.LightningModule):
         # flags
         self.file = config.file.log
         # build data module
-        self.data_module = RecipeDataModule(config)
-        self.data_module.setup()
+        self.dataset = RecipeDataModule(config)
+        self.dataset.setup()
         # layers
         self.embedding = nn.Embedding(
-            self.data_module.vocab_size, config.model.d_model
+            self.dataset.vocab_size, config.model.d_model
         )
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=config.model.d_model,
@@ -41,7 +41,7 @@ class Model(pl.LightningModule):
                 # norm=
         )
         self.decoder = nn.Linear(
-            config.model.d_model, self.data_module.vocab_size
+            config.model.d_model, self.dataset.vocab_size
         )
         self.softmax = nn.Softmax(dim=(-1))
         # loss
@@ -74,11 +74,23 @@ class Model(pl.LightningModule):
         Args:
             batch:  [b x seqlen]
         '''
-        # [b] | get number of indecies to mask per sequence in batch
-        seqlen = torch.where(batch!=self.data_module.PAD_ID, True, False).sum(1)
-
-        print(seqlen)
-        # select indecies to augment
+        # ---------------------- one way --------------------
+        # IDEA: so we could do it this way where every sequence has ~15% masked
+        # or we give every token a 15% probability of being masked. The former
+        # is more conceptually favorable to me, but other way is easier and
+        # appears in conventional implementations.
+        # # [b] | get number of indecies to mask per sequence in batch
+        # seqlen = torch.where(batch!=self.dataset.PAD_ID, True, False).sum(1)
+        # # [b] | calc number of tokens to augment per sequence
+        # n_augmented = (self.frac_augmented * seqlen).round()
+        # print(f'n_augmented: {n_augmented}')
+        # ---------------------- other way --------------------
+        augmentation_randomness = torch.rand(batch.size(), dtype=torch.float16)
+        is_augmented = torch.where(
+            condition=(augmentation_randomness > self.frac_augmented),
+            x=(batch != self.dataset.PAD_ID),
+            y=False
+        )
 
         raise RuntimeError()
 
@@ -104,10 +116,10 @@ class Model(pl.LightningModule):
 
     # data loaders
     def train_dataloader(self):
-        return self.data_module.train_dataloader()
+        return self.dataset.train_dataloader()
 
     def val_dataloader(self):
-        return self.data_module.val_dataloader()
+        return self.dataset.val_dataloader()
 
     def test_dataloader(self):
-        return self.data_module.test_dataloader()
+        return self.dataset.test_dataloader()
