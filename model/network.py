@@ -47,7 +47,10 @@ class Model(pl.LightningModule):
         )
         self.softmax = nn.Softmax(dim=(-1))
         # loss
-        # self.loss = nn.CrossEntropyLoss()
+        self.ignore_index = -1
+        self.cross_entropy = nn.CrossEntropyLoss(
+            ignore_index=self.ignore_index
+        )
 
     def forward(
             self, X: torch.Tensor, mask: torch.Tensor, pad_mask: torch.Tensor
@@ -108,8 +111,10 @@ class Model(pl.LightningModule):
         # mask batch
         batch[is_masked] = self.dataset.MASK_ID
         # randomize batch
-        batch[is_random] =  self.random_tokens(int(is_random.sum()))
-        return batch
+        batch[is_random] = self.random_tokens(int(is_random.sum()))
+        print(f'time: {time() - s}')
+        # add build targets
+        return batch, targets
 
     def random_tokens(self, n: int) -> torch.Tensor:
         ''' Generates n random tokens in usable vocab '''
@@ -119,7 +124,7 @@ class Model(pl.LightningModule):
     def training_step(self, batch: torch.Tensor, batch_idx: int):
         ''' '''
         # apply augmentations
-        augmented_batch = self.augment_batch(batch.clone())
+        augmented_batch = self.augment_batch(batch)
         # get predictions
         preds = self(augmented_batch)
         # calculate loss
