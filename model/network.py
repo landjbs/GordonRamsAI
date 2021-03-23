@@ -45,17 +45,19 @@ class Model(pl.LightningModule):
         )
         self.softmax = nn.Softmax(dim=(-1))
         # loss
-        self.loss = nn.CrossEntropyLoss()
+        # self.loss = nn.CrossEntropyLoss()
 
     def forward(
             self, X: torch.Tensor, mask: torch.Tensor, pad_mask: torch.Tensor
         ):
         ''' '''
         E = self.embedding(X)
-        E = self.encoder(E)
+        E = self.encoder(E, mask=mask, src_key_padding_mask=pad_mask)
         logits = self.decoder(E)
         preds = self.softmax(logits)
         return preds
+
+    # def loss(self, ):
 
     # configuration
     def configure_optimizers(self):
@@ -73,6 +75,14 @@ class Model(pl.LightningModule):
             batch:  [b x seqlen]
         '''
         print(batch.shape)
+        # [b] | get number of indecies to mask per sequence in batch
+        seqlen = batch[batch!=self.data_module.PAD_ID].sum(dim=0)
+
+        seqlen = torch.where(batch!=self.data_module.PAD_ID, True, False).sum(1)
+
+        print(seqlen)
+        # select indecies to augment
+
         raise RuntimeError()
 
     # steps

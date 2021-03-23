@@ -9,11 +9,12 @@ from pytorch_lightning import LightningDataModule
 
 
 class RecipeDataModule(LightningDataModule):
-    CLS_TOKEN = '[CLS]' # token for start of a sequence
-    SEP_TOKEN = '[SEP]' # token for seperating two sequences
-    MASK_TOKEN = '[MASK]' # tokens for model to predict
-    UNK_TOKEN = '[UNK]' # default for unknown tokens
-    PAD_TOKEN = '[PAD]'  # token for padding in sequence
+    # NOTE: ids of special tokens can be accessed with {name}_ID (eg. CLS_ID).
+    CLS_TOKEN = 'CLS' # token for start of a sequence
+    SEP_TOKEN = 'SEP' # token for seperating two sequences
+    MASK_TOKEN = 'MASK' # tokens for model to predict
+    UNK_TOKEN = 'UNK' # default for unknown tokens
+    PAD_TOKEN = 'PAD'  # token for padding in sequence
     SPECIAL_TOKENS = [CLS_TOKEN, SEP_TOKEN, MASK_TOKEN, UNK_TOKEN, PAD_TOKEN]
 
     def __init__(self, config):
@@ -68,9 +69,12 @@ class RecipeDataModule(LightningDataModule):
         special_end = special_start + len(self.SPECIAL_TOKENS)
         special_ids = range(special_start, special_end)
         # add special tokens to map
-        ingr_name_to_id_map.update(
-            {token: id for token, id in zip(self.SPECIAL_TOKENS, special_ids)}
-        )
+        for id, token in zip(special_ids, self.SPECIAL_TOKENS):
+            # TODO: this is horrible naming technique that depends on the tokens
+            # value not its name in the class. Must be changed asap.
+            name = f'{token.split("_")[0]}_ID'
+            setattr(self, name, id)
+            ingr_name_to_id_map.update({token: id})
         return ingr_name_to_id_map
 
 
