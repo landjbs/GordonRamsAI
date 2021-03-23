@@ -27,11 +27,6 @@ class RecipeDataModule(LightningDataModule):
         self.val_frac = config.train.val_frac
         self.test_frac = config.train.test_frac
         self.num_workers = config.compute.num_workers
-        # masking
-        self.frac_augmented = config.masking.frac_augmented
-        self.frac_masked = config.masking.frac_masked
-        self.frac_random = config.masking.frac_random
-        self.frac_unchanged = config.masking.frac_unchanged
 
     def __repr__(self):
         repr_data = ['batch_size']

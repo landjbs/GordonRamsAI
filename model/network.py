@@ -14,6 +14,11 @@ class Model(pl.LightningModule):
         # hparams
         self.lr = config.optimizer.lr
         # self.beta = config.optimizer.beta
+        # masking
+        self.frac_augmented = config.masking.frac_augmented
+        self.frac_masked = config.masking.frac_masked
+        self.frac_random = config.masking.frac_random
+        self.frac_unchanged = config.masking.frac_unchanged
         # build data module
         self.data_module = RecipeDataModule(config)
         self.data_module.setup()
@@ -53,6 +58,11 @@ class Model(pl.LightningModule):
             lr=self.lr,
             # betas=(self.beta,) # TODO: implement
         )
+
+    # masking
+    def augment_batch(self, batch: torch.Tensor):
+        ''' Applies masking to batch '''
+        pass
 
     # steps
     def training_step(self, batch: torch.Tensor, batch_idx: int):
