@@ -109,9 +109,6 @@ class Model(pl.LightningModule):
         batch[is_masked] = self.dataset.MASK_ID
         # randomize batch
         batch[is_random] =  self.random_tokens(int(is_random.sum()))
-        print(f'random: {batch}')
-        print(f'time: {time() - s}')
-        raise RuntimeError()
         return batch
 
     def random_tokens(self, n: int) -> torch.Tensor:
@@ -122,7 +119,7 @@ class Model(pl.LightningModule):
     def training_step(self, batch: torch.Tensor, batch_idx: int):
         ''' '''
         # apply augmentations
-        augmented_batch = self.augment_batch(batch)
+        augmented_batch = self.augment_batch(batch.clone())
         # get predictions
         preds = self(augmented_batch)
         # calculate loss
