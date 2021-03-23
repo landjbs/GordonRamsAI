@@ -28,7 +28,7 @@ class Model(pl.LightningModule):
         self.dataset.setup()
         # layers
         self.embedding = nn.Embedding(
-            num_embeddings=self.dataset.vocab_size,
+            num_embeddings=self.dataset.token_count,
             embedding_dim=config.model.d_model,
             padding_idx=self.dataset.PAD_ID
         )
@@ -56,9 +56,16 @@ class Model(pl.LightningModule):
 
     def forward(self, X: torch.Tensor, pad_mask: torch.Tensor):
         ''' '''
+        print(X.shape)
+        # [b x n] -> [b x n x d_m] | fetch embedding vectors of each id
         E = self.embedding(X)
+        print(E.shape)
+        print(pad_mask.shape)
+        # [b x n x d_m] -> [b x n x d_m] |
         E = self.encoder(E, src_key_padding_mask=pad_mask)
+        # [b x n x d_m] -> [b x n x vocab_size] |
         logits = self.decoder(E)
+        # [b x n x vocab_size] -> [b x n x vocab_size] | 
         preds = self.softmax(logits)
         return preds
 
