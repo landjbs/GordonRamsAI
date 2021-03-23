@@ -84,13 +84,12 @@ class RecipeDataModule(LightningDataModule):
     def food_name_to_id(self, name):
         return self.ingr_name_to_id_map[id]
 
-    @classmethod
-    def dataframe_to_tensor(cls, dataframe):
+    def dataframe_to_tensor(self, dataframe):
         ingredient_data = dataframe['ingredient_ids'].map(
-            cls.id_string_to_tensor
+            self.id_string_to_tensor
         )
         ingredient_data = torch.nn.utils.rnn.pad_sequence(
-            ingredient_data,  batch_first=True
+            ingredient_data,  batch_first=True, padding_value=self.PAD_ID
         )
         return ingredient_data
 
@@ -141,12 +140,14 @@ class RecipeDataModule(LightningDataModule):
         return train_data, val_data, test_data
 
     def prepare_ingr_map(self) -> pd.DataFrame:
+        # load ingr_map
         with open(self.INGR_MAP_PATH, 'rb') as INGR_MAP_PATH:
             ingr_map = pickle.load(INGR_MAP_PATH)
-        # update with additional tokens
-        for i, x in enumerate(sorted(list(set(ingr_map['id'])))):
-            assert (i==x), (i,x)
-        return ingr_map
+        # save ingr_map
+        self.ingr_map = ingr_map
+        # update with additional tokens and cache map
+        _ = self.ingr_name_to_id_map
+        return True
 
     # setup
     def prepare_data(self):
@@ -154,8 +155,8 @@ class RecipeDataModule(LightningDataModule):
 
     def setup(self):
         # load files
-        recipe_dataset = self.prepare_recipe_dataset()
         self.ingr_map = self.prepare_ingr_map()
+        recipe_dataset = self.prepare_recipe_dataset()
         # split and cache datasets
         (
             self.train_data,

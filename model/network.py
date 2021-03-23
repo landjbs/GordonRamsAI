@@ -74,10 +74,7 @@ class Model(pl.LightningModule):
         Args:
             batch:  [b x seqlen]
         '''
-        print(batch.shape)
         # [b] | get number of indecies to mask per sequence in batch
-        seqlen = batch[batch!=self.data_module.PAD_ID].sum(dim=0)
-
         seqlen = torch.where(batch!=self.data_module.PAD_ID, True, False).sum(1)
 
         print(seqlen)
