@@ -144,9 +144,9 @@ class Model(pl.LightningModule):
         # [b x n x v] -> | reshape predictions for cross_entropy
         # [(b * n) x v], [(b * n)] | calculate loss
         loss = self.cross_entropy(preds.flatten(0, 1), targets.flatten())
-        # # log
-        # if self.file:
-        #     pass
+        # log
+        if self.file:
+            self.log('Metrics/Loss', loss.detach(), prog_bar=True)
         return loss
 
     def validation_step(self, batch: torch.Tensor, batch_idx: int):

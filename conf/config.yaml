@@ -19,7 +19,7 @@ model:
 
 optimizer:
   # beta: 0.01
-  lr: 0.1 # learning rate of optimizer
+  lr: 0.001 # learning rate of optimizer
   type: adam # type of optimizer
   grad_clip: False # gradient clipping
 
@@ -39,7 +39,7 @@ interval:
   val_every: 100 # step interval for validation
 
 file:
-  log: False
-  save_path: False
+  log: True
+  save_path: 'tests'
   load_path: False
-  run_name: False
+  run_name: 'first'

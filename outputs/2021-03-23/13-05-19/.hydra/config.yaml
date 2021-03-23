@@ -31,7 +31,7 @@ interval:
   log_every: 10
   val_every: 100
 file:
-  log: false
-  save_path: false
+  log: true
+  save_path: tests
   load_path: false
-  run_name: false
+  run_name: first
