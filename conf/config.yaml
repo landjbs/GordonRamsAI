@@ -36,7 +36,7 @@ train:
 
 interval:
   log_every: 10 # step interval for logging
-  val_every: 100 #
+  val_every: 100 # step interval for validation
 
 file:
   log: False
