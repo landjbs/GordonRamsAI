@@ -13,11 +13,14 @@ class Model(pl.LightningModule):
         super().__init__()
         # hparams
         self.lr = config.optimizer.lr
-        self.beta = config.optimizer.beta
+        # self.beta = config.optimizer.beta
         # build data module
         self.data_module = RecipeDataModule(config)
+        self.data_module.setup()
         # layers
-        self.embedding = nn.Embedding(vocab_size, config.model.d_model)
+        self.embedding = nn.Embedding(
+            self.data_module.vocab_size, config.model.d_model
+        )
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=config.model.d_model,
             nhead=config.model.nhead,

@@ -53,8 +53,8 @@ class Trainer(pl.Trainer):
             # logging
             logger=logger,
             # profiler=config.profiler,
-            log_every_n_steps=config.steps.log_every,
-            val_check_interval=config.steps.val_every,
+            log_every_n_steps=config.interval.log_every,
+            val_check_interval=config.interval.val_every,
             callbacks=callbacks,
             resume_from_checkpoint=config.file.load_path
         )
