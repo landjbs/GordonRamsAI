@@ -3,6 +3,7 @@ import torch.nn as nn
 import pytorch_lightning as pl
 from omegaconf import DictConfig
 import numpy as np
+from time import time
 
 from data import RecipeDataModule
 
@@ -87,6 +88,7 @@ class Model(pl.LightningModule):
         # n_augmented = (self.frac_augmented * seqlen).round()
         # print(f'n_augmented: {n_augmented}')
         # ---------------------- other way --------------------
+        s = time()
         # [b x seqlen] | all tokens tagged for augmentation
         is_augmented = (
             (torch.rand(batch_shape) < self.frac_augmented)
@@ -97,15 +99,34 @@ class Model(pl.LightningModule):
             (torch.rand(batch_shape) < self.frac_masked) & is_augmented
         )
         # [b x seqlen] | select values to randomize
-        # WARNING: this is not yet the proper math
+        # WARNING: this is not yet the proper math to maintain actual ratios
         is_random = (
-            (torch.rand(batch_shape) < self.frac_random) & is_augmented
+            (torch.rand(batch_shape) < self.frac_random)
+            & is_augmented
+            & ~is_masked
         )
+        # [] | total number of random tokens to generate
+        n_random = is_random.sum()
+        print(f'n_random: {n_random}')
+
         # mask batch
-        batch = batch.where(is_masked, self.dataset.MASK_ID)
+        # batch = batch.where(is_masked, self.dataset.MASK_ID)
+        batch[is_masked] = self.dataset.MASK_ID
         # randomize batch
-        batch = batch.where(is_random, )
-        raise batch
+        print(f'random_tokens: {self.random_tokens(is_random.sum())}')
+        batch[is_random] =  self.random_tokens(is_random.sum())
+        print(f'random: {batch}')
+        print(f'time: {time() - s}')
+        raise RuntimeError()
+        return batch
+
+    def random_tokens(self, n: int):
+        ''' Generates n random tokens in usable vocab '''
+        x = np.random.choice(
+            range(self.dataset.vocab_size), size=n, replace=True
+        )
+        raise RuntimeError(x)
+        return x
 
     # steps
     def training_step(self, batch: torch.Tensor, batch_idx: int):
