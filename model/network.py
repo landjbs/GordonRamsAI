@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import pytorch_lightning as pl
 from omegaconf import DictConfig
+import numpy as np
 
 from data import RecipeDataModule
 
@@ -93,12 +94,18 @@ class Model(pl.LightningModule):
         )
         # [b x seqlen] | select values to mask
         is_masked = (
-            (torch.rand(batch_shape) < self.frac_masked)
-            & is_augmented
+            (torch.rand(batch_shape) < self.frac_masked) & is_augmented
         )
-        # [b x seqlen] | select values to
-
-        raise RuntimeError()
+        # [b x seqlen] | select values to randomize
+        # WARNING: this is not yet the proper math
+        is_random = (
+            (torch.rand(batch_shape) < self.frac_random) & is_augmented
+        )
+        # mask batch
+        batch = batch.where(is_masked, self.dataset.MASK_ID)
+        # randomize batch
+        batch = batch.where(is_random, )
+        raise batch
 
     # steps
     def training_step(self, batch: torch.Tensor, batch_idx: int):
