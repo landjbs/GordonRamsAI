@@ -55,7 +55,15 @@ class Model(pl.LightningModule):
         )
 
     def forward(self, X: torch.Tensor, pad_mask: torch.Tensor):
-        ''' '''
+        '''
+        Forward pass through the network.
+        Args:
+            X:          Padded input sequence [b x n x d_m]
+            pad_mask:   Byte tensor denoting masked tokens [b x n]
+        Returns:
+            preds:      Normalized prediction distribution for each token
+                        [b x n x vocab_size]
+        '''
         print(X.shape)
         # [b x n] -> [b x n x d_m] | fetch embedding vectors of each id
         E = self.embedding(X)
@@ -63,9 +71,10 @@ class Model(pl.LightningModule):
         print(pad_mask.shape)
         # [b x n x d_m] -> [b x n x d_m] |
         E = self.encoder(E, src_key_padding_mask=pad_mask)
+        raise RuntimeError()
         # [b x n x d_m] -> [b x n x vocab_size] |
         logits = self.decoder(E)
-        # [b x n x vocab_size] -> [b x n x vocab_size] | 
+        # [b x n x vocab_size] -> [b x n x vocab_size] |
         preds = self.softmax(logits)
         return preds
 
