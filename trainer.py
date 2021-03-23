@@ -11,7 +11,7 @@ class Trainer(pl.Trainer):
         # filing
         if config.file.log:
             # build logger
-            logger = TensorBoardLogger(
+            logger = pl.loggers.TensorBoardLogger(
                 save_dir=config.file.save_path,
                 name=config.file.run_name,
                 # log_graph=config. "type is long run"
@@ -21,10 +21,8 @@ class Trainer(pl.Trainer):
                 f'{config.file.save_path}/{config.file.run_name}'
                 f'/version_{logger.version}'
             )
-            checkpoint_callback = ModelCheckpoint(
-                filepath=(
-                    f'{save_dir}/checkpoints'
-                ),
+            checkpoint_callback = pl.callbacks.ModelCheckpoint(
+                f'{save_dir}/checkpoints',
                 # save_last=True
                 # monitor='epoch',
                 # save_top_k=1,

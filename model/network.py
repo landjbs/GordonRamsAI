@@ -102,9 +102,9 @@ class Model(pl.LightningModule):
         # n_augmented = (self.frac_augmented * n).round()
         # print(f'n_augmented: {n_augmented}')
         # ---------------------- other way --------------------
-        # init target sequence for prediction
+        # [b x n] | init target sequence for prediction
         targets = batch.clone()
-        # mask for all padded tokens
+        # [b x n] | mask for all padded tokens
         pad_mask = (batch == self.dataset.PAD_ID)
         # [b x n] | all tokens tagged for augmentation
         is_augmented = (
@@ -116,7 +116,7 @@ class Model(pl.LightningModule):
             (torch.rand(batch_shape) < self.frac_masked) & is_augmented
         )
         # [b x n] | select values to randomize
-        # WARNING: this is not yet the proper math to maintain actual ratios
+        # WARNING: this is not yet the proper stats to maintain actual ratios
         is_random = (
             (torch.rand(batch_shape) < self.frac_random)
             & is_augmented
@@ -141,16 +141,23 @@ class Model(pl.LightningModule):
         batch, targets, pad_mask = self.augment_batch(batch)
         # [b x n x vocab_size] | get predictions
         preds = self(batch, pad_mask)
-        # [b x n x v] -> | reshape predictions for cross_entropy
         # [(b * n) x v], [(b * n)] | calculate loss
         loss = self.cross_entropy(preds.flatten(0, 1), targets.flatten())
         # log
         if self.file:
-            self.log('Metrics/Loss', loss.detach(), prog_bar=True)
+            self.log('Metrics/Loss', loss.detach())
         return loss
 
     def validation_step(self, batch: torch.Tensor, batch_idx: int):
-        pass
+        if self.file:
+            # apply augmentations
+            batch, targets, pad_mask = self.augment_batch(batch)
+            # [b x n x vocab_size] | get predictions
+            preds = self(batch, pad_mask)
+            # [(b * n) x v], [(b * n)] | calculate loss
+            loss = self.cross_entropy(preds.flatten(0, 1), targets.flatten())
+            # log
+            
 
     def test_step(self, batch: torch.Tensor, batch_idx: int):
         pass
