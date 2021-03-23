@@ -53,7 +53,7 @@ class Model(pl.LightningModule):
         )
 
     def forward(
-            self, X: torch.Tensor, mask: torch.Tensor, pad_mask: torch.Tensor
+            self, X: torch.Tensor, pad_mask: torch.Tensor
         ):
         ''' '''
         E = self.embedding(X)
@@ -127,9 +127,9 @@ class Model(pl.LightningModule):
     def training_step(self, batch: torch.Tensor, batch_idx: int):
         ''' '''
         # apply augmentations
-        batch, targets = self.augment_batch(batch)
+        batch, targets, pad_mask = self.augment_batch(batch)
         # get predictions
-        preds = self(batch, )
+        preds = self(batch, pad_mask)
         # calculate loss
         loss = self.loss(preds, targets)
         print(loss)
