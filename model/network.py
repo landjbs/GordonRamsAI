@@ -28,7 +28,9 @@ class Model(pl.LightningModule):
         self.dataset.setup()
         # layers
         self.embedding = nn.Embedding(
-            self.dataset.vocab_size, config.model.d_model
+            num_embeddings=self.dataset.vocab_size,
+            embedding_dim=config.model.d_model,
+            padding_idx=self.dataset.PAD_ID
         )
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=config.model.d_model,
@@ -52,12 +54,10 @@ class Model(pl.LightningModule):
             ignore_index=self.ignore_index
         )
 
-    def forward(
-            self, X: torch.Tensor, pad_mask: torch.Tensor
-        ):
+    def forward(self, X: torch.Tensor, pad_mask: torch.Tensor):
         ''' '''
         E = self.embedding(X)
-        E = self.encoder(E, mask=mask, src_key_padding_mask=pad_mask)
+        E = self.encoder(E, src_key_padding_mask=pad_mask)
         logits = self.decoder(E)
         preds = self.softmax(logits)
         return preds
