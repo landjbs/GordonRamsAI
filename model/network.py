@@ -91,11 +91,14 @@ class Model(pl.LightningModule):
         # n_augmented = (self.frac_augmented * seqlen).round()
         # print(f'n_augmented: {n_augmented}')
         # ---------------------- other way --------------------
-        s = time()
+        # init target sequence for prediction
+        targets = batch.clone()
+        # mask for all padded tokens
+        pad_mask = (batch == self.dataset.PAD_ID)
         # [b x seqlen] | all tokens tagged for augmentation
         is_augmented = (
             (torch.rand(batch_shape) < self.frac_augmented)
-            & (batch != self.dataset.PAD_ID)
+            & ~pad_mask
         )
         # [b x seqlen] | select values to mask
         is_masked = (
@@ -112,27 +115,28 @@ class Model(pl.LightningModule):
         batch[is_masked] = self.dataset.MASK_ID
         # randomize batch
         batch[is_random] = self.random_tokens(int(is_random.sum()))
-        print(f'time: {time() - s}')
-        # add build targets
-        return batch, targets
+        # ignore all non-augmented indecies of targets
+        targets[~is_augmented] = self.ignore_index
+        return batch, targets, pad_mask
 
     def random_tokens(self, n: int) -> torch.Tensor:
         ''' Generates n random tokens in usable vocab '''
-        return torch.tensor(np.random.choice(range(10), size=n, replace=True))
+        return torch.randint(high=self.dataset.vocab_size, size=(n,))
 
     # steps
     def training_step(self, batch: torch.Tensor, batch_idx: int):
         ''' '''
         # apply augmentations
-        augmented_batch = self.augment_batch(batch)
+        batch, targets = self.augment_batch(batch)
         # get predictions
-        preds = self(augmented_batch)
+        preds = self(batch, )
         # calculate loss
-        # loss = self.loss(preds, batch)
+        loss = self.loss(preds, targets)
+        print(loss)
         # # log
         # if self.file:
         #     pass
-        # return loss
+        return loss
 
     def validation_step(self, batch: torch.Tensor, batch_idx: int):
         pass
