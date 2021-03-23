@@ -42,14 +42,16 @@ class Model(pl.LightningModule):
             config.model.d_model, self.data_module.vocab_size
         )
         self.softmax = nn.Softmax(dim=(-1))
+        # loss
+        self.loss = nn.CrossEntropyLoss()
 
     def forward(self, X: torch.Tensor):
         ''' '''
         E = self.embedding(X)
         E = self.encoder(E)
         logits = self.decoder(E)
-        pi = self.softmax(logits)
-        return logits
+        preds = self.softmax(logits)
+        return preds
 
     # configuration
     def configure_optimizers(self):
@@ -66,7 +68,11 @@ class Model(pl.LightningModule):
 
     # steps
     def training_step(self, batch: torch.Tensor, batch_idx: int):
-        print(self(batch).shape)
+        ''' '''
+        # apply augmentations
+        augmented_batch = self.augment_batch(batch)
+        # get predictions
+
 
     def validation_step(self, batch: torch.Tensor, batch_idx: int):
         pass
