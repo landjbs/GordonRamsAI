@@ -56,9 +56,7 @@ class RecipeDataModule(LightningDataModule):
     # converters
     @cached_property
     def ingr_id_to_name_map(self):
-        return {
-            name : id for name, id in self.ingr_name_to_id_map
-        }
+        return {name : id for name, id in self.ingr_name_to_id_map}
 
     @cached_property
     def ingr_name_to_id_map(self):
@@ -71,7 +69,10 @@ class RecipeDataModule(LightningDataModule):
             row['replaced'] : row['id'] for _, row in self.ingr_map.iterrows()
         }
         # get ids for special tokens
-        special_ids = range(row['id']+1, len(self.SPECIAL_TOKENS))
+        special_ids = range(
+            self.ingr_map['id'].max()+1,
+            len(self.SPECIAL_TOKENS)
+        )
         # add special tokens to map
         ingr_name_to_id_map.update(
             {token: id for token, id in zip(self.SPECIAL_TOKENS, special_ids)}
@@ -126,7 +127,7 @@ class RecipeDataModule(LightningDataModule):
         # convert ingredient_ids to tensor
         recipe_data = self.dataframe_to_tensor(recipe_df)
         # apply masking scheme to recipe_data
-        recipe_data = self.mask_ingredient_tensor(recipe_data)
+        # recipe_data = self.mask_ingredient_tensor(recipe_data)
         return recipe_data
 
     def split_data(self, recipe_dataset: torch.Tensor):
