@@ -105,28 +105,18 @@ class Model(pl.LightningModule):
             & is_augmented
             & ~is_masked
         )
-        # [] | total number of random tokens to generate
-        n_random = is_random.sum()
-        print(f'n_random: {n_random}')
-
         # mask batch
-        # batch = batch.where(is_masked, self.dataset.MASK_ID)
         batch[is_masked] = self.dataset.MASK_ID
         # randomize batch
-        print(f'random_tokens: {self.random_tokens(is_random.sum())}')
-        batch[is_random] =  self.random_tokens(is_random.sum())
+        batch[is_random] =  self.random_tokens(int(is_random.sum()))
         print(f'random: {batch}')
         print(f'time: {time() - s}')
         raise RuntimeError()
         return batch
 
-    def random_tokens(self, n: int):
+    def random_tokens(self, n: int) -> torch.Tensor:
         ''' Generates n random tokens in usable vocab '''
-        x = np.random.choice(
-            range(self.dataset.vocab_size), size=n, replace=True
-        )
-        raise RuntimeError(x)
-        return x
+        return torch.tensor(np.random.choice(range(10), size=n, replace=True))
 
     # steps
     def training_step(self, batch: torch.Tensor, batch_idx: int):
