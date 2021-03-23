@@ -19,6 +19,8 @@ class Model(pl.LightningModule):
         self.frac_masked = config.masking.frac_masked
         self.frac_random = config.masking.frac_random
         self.frac_unchanged = config.masking.frac_unchanged
+        # flags
+        self.file = config.file.log
         # build data module
         self.data_module = RecipeDataModule(config)
         self.data_module.setup()
@@ -45,7 +47,9 @@ class Model(pl.LightningModule):
         # loss
         self.loss = nn.CrossEntropyLoss()
 
-    def forward(self, X: torch.Tensor):
+    def forward(
+            self, X: torch.Tensor, mask: torch.Tensor, pad_mask: torch.Tensor
+        ):
         ''' '''
         E = self.embedding(X)
         E = self.encoder(E)
@@ -63,8 +67,13 @@ class Model(pl.LightningModule):
 
     # masking
     def augment_batch(self, batch: torch.Tensor):
-        ''' Applies masking to batch '''
-        pass
+        '''
+        Applies masking to batch.
+        Args:
+            batch:  [b x seqlen]
+        '''
+        print(batch.shape)
+        raise RuntimeError()
 
     # steps
     def training_step(self, batch: torch.Tensor, batch_idx: int):
@@ -72,7 +81,13 @@ class Model(pl.LightningModule):
         # apply augmentations
         augmented_batch = self.augment_batch(batch)
         # get predictions
-
+        preds = self(augmented_batch)
+        # calculate loss
+        # loss = self.loss(preds, batch)
+        # # log
+        # if self.file:
+        #     pass
+        # return loss
 
     def validation_step(self, batch: torch.Tensor, batch_idx: int):
         pass
