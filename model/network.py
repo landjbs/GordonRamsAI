@@ -33,7 +33,9 @@ class Model(pl.LightningModule):
                 num_layers=config.model.num_layers,
                 # norm=
         )
-        self.decoder = nn.Linear(config.model.d_model, vocab_size)
+        self.decoder = nn.Linear(
+            config.model.d_model, self.data_module.vocab_size
+        )
         self.softmax = nn.Softmax(dim=(-1))
 
     def forward(self, X: torch.Tensor):

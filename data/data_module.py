@@ -56,7 +56,7 @@ class RecipeDataModule(LightningDataModule):
     # converters
     @cached_property
     def ingr_id_to_name_map(self):
-        return {name : id for name, id in self.ingr_name_to_id_map}
+        return {name : id for name, id in self.ingr_name_to_id_map.items()}
 
     @cached_property
     def ingr_name_to_id_map(self):
@@ -69,10 +69,9 @@ class RecipeDataModule(LightningDataModule):
             row['replaced'] : row['id'] for _, row in self.ingr_map.iterrows()
         }
         # get ids for special tokens
-        special_ids = range(
-            self.ingr_map['id'].max()+1,
-            len(self.SPECIAL_TOKENS)
-        )
+        special_start = self.ingr_map['id'].max() + 1
+        special_end = special_start + len(self.SPECIAL_TOKENS)
+        special_ids = range(special_start, special_end)
         # add special tokens to map
         ingr_name_to_id_map.update(
             {token: id for token, id in zip(self.SPECIAL_TOKENS, special_ids)}
