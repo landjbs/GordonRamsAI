@@ -58,7 +58,7 @@ class Model(pl.LightningModule):
         )
 
 
-    def visualize(
+    def visualize_sentence(
         self, ground_truth: torch.Tensor, targets: torch.Tensor,
         preds: torch.Tensor = None, topk: int = 3
         ) -> str:
@@ -91,6 +91,15 @@ class Model(pl.LightningModule):
 
         str_out = f'{sentence}\n{top_preds}'
         return str_out
+
+    def visualize(
+        self, ground_truth: torch.Tensor, targets: torch.Tensor,
+        preds: torch.Tensor = None, topk: int = 3
+        ):
+        return f'\n{"="*40}\n'.join(
+            self.visualize_sentence(ground_truth[i], targets[i], preds[i])
+            for i in range(ground_truth.size(0))
+        )
 
     def forward(self, X: torch.Tensor, pad_mask: torch.Tensor):
         '''
@@ -206,9 +215,10 @@ class Model(pl.LightningModule):
             self.log('Validation/Loss', loss.detach())
             # analyze
             # display some completions
-            translation = self.visualize(
-                batch[0]
-            )
+            for i in range(preds.size(0)):
+                translation = self.visualize(
+                    batch[0]
+                )
             self.logger.experiment.add_text('Completions', translation)
 
     def test_step(self, batch: torch.Tensor, batch_idx: int):
