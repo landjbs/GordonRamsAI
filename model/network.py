@@ -75,7 +75,7 @@ class Model(pl.LightningModule):
             else:
                 token_color = 'red'
                 pred_ps, pred_ids = pred.topk(k=topk)
-                top_preds += f'{colored(true_name, "blue")}:\n'
+                top_preds += f'{colored(true_name, "blue")}:\n\t'
                 top_preds += '\n\t'.join(
                     colored(
                         (
@@ -91,18 +91,6 @@ class Model(pl.LightningModule):
 
         str_out = f'{sentence}\n{top_preds}'
         return str_out
-        #
-        # s = ', '.join(
-        #     colored(
-        #         self.dataset.food_id_to_name(id),
-        #         color=('green' if t==self.ignore_index else 'red')
-        #     )
-        #     for id, t in zip(ground_truth, targets)
-        # )
-        # s += '\n'
-        # s += '\n'.join(
-        #     f'{truth_word}'
-        # )
 
     def forward(self, X: torch.Tensor, pad_mask: torch.Tensor):
         '''
@@ -218,7 +206,9 @@ class Model(pl.LightningModule):
             self.log('Validation/Loss', loss.detach())
             # analyze
             # display some completions
-            translation = self.dataset.translate(batch[0])
+            translation = self.visualize(
+                batch[0]
+            )
             self.logger.experiment.add_text('Completions', translation)
 
     def test_step(self, batch: torch.Tensor, batch_idx: int):
