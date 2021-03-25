@@ -189,15 +189,6 @@ class Model(pl.LightningModule):
         preds = self(masked_batch, pad_mask)
         # [(b * n) x v], [(b * n)] | calculate loss
         loss = self.cross_entropy(preds.flatten(0, 1), targets.flatten())
-        #
-        for i in range(preds.size(0)):
-            print(
-                self.visualize(
-                    ground_truth=batch[i],
-                    targets=targets[i],
-                    preds=preds[i]
-                )
-            )
         # log
         if self.file:
             self.log('Train/Loss', loss.detach())
@@ -206,20 +197,19 @@ class Model(pl.LightningModule):
     def validation_step(self, batch: torch.Tensor, batch_idx: int):
         if self.file:
             # apply augmentations
-            batch, targets, pad_mask = self.augment_batch(batch)
+            masked_batch, targets, pad_mask = self.augment_batch(batch.clone())
             # [b x n x vocab_size] | get predictions
-            preds = self(batch, pad_mask)
+            preds = self(masked_batch, pad_mask)
             # [(b * n) x v], [(b * n)] | calculate loss
             loss = self.cross_entropy(preds.flatten(0, 1), targets.flatten())
             # log metrics
             self.log('Validation/Loss', loss.detach())
             # analyze
             # display some completions
-            for i in range(preds.size(0)):
-                translation = self.visualize(
-                    batch[0]
-                )
-            self.logger.experiment.add_text('Completions', translation)
+            self.logger.experiment.add_text(
+                'Completions',
+                self.visualize(batch, targets, preds)
+            )
 
     def test_step(self, batch: torch.Tensor, batch_idx: int):
         pass
