@@ -8,6 +8,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from cached_property import cached_property
 from pytorch_lightning import LightningDataModule
+from termcolor import colored
 
 
 class RecipeDataModule(LightningDataModule):
@@ -123,6 +124,14 @@ class RecipeDataModule(LightningDataModule):
             raise NotImplementedError()
         else:
             raise ValueError('Invalid dims for translated tensor.')
+
+    def visualize(
+        self, ground_truth: torch.Tensor, augmented: torch.Tensor,
+        targets: torch.Tensor, preds: torch.Tensor
+        ) -> str:
+        ''' Visualizes '''
+        
+        return s
 
     # preparation
     def mask_ingredient_tensor(self, data):

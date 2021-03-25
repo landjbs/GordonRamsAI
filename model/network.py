@@ -56,6 +56,46 @@ class Model(pl.LightningModule):
             ignore_index=self.ignore_index
         )
 
+
+    def visualize(
+        self, ground_truth: torch.Tensor, targets: torch.Tensor,
+        preds: torch.Tensor = None, topk: int = 3
+        ) -> str:
+        ''' '''
+        from termcolor import colored
+
+        sentence = ''
+        top_preds = ''
+
+        for true_id, target_id, pred in zip(ground_truth, targets, preds):
+            if true_id == self.dataset.PAD_ID:
+                continue
+            true_name = self.dataset.food_id_to_name(true_id)
+            if target_id==self.ignore_index:
+                sentence += colored(f'{true_name} | ', 'green')
+            else:
+                pred_ps, pred_ids = pred.topk(k=topk)
+                sentence += colored(true_name, 'red')
+                top_preds += f'{true_name}:\n'
+                top_preds += '\n\t'.join(
+                    f'{self.dataset.food_id_to_name(pred_id)} {round(float(pred_p), 2)}'
+                    for pred_p, pred_id in zip(pred_ps, pred_ids)
+                )
+        str_out = f'{sentence}\n{top_preds}'
+        return str_out
+        #
+        # s = ', '.join(
+        #     colored(
+        #         self.dataset.food_id_to_name(id),
+        #         color=('green' if t==self.ignore_index else 'red')
+        #     )
+        #     for id, t in zip(ground_truth, targets)
+        # )
+        # s += '\n'
+        # s += '\n'.join(
+        #     f'{truth_word}'
+        # )
+
     def forward(self, X: torch.Tensor, pad_mask: torch.Tensor):
         '''
         Forward pass through the network.
@@ -139,11 +179,19 @@ class Model(pl.LightningModule):
     def training_step(self, batch: torch.Tensor, batch_idx: int):
         ''' '''
         # apply augmentations
-        batch, targets, pad_mask = self.augment_batch(batch)
+        masked_batch, targets, pad_mask = self.augment_batch(batch.clone())
         # [b x n x vocab_size] | get predictions
-        preds = self(batch, pad_mask)
+        preds = self(masked_batch, pad_mask)
         # [(b * n) x v], [(b * n)] | calculate loss
         loss = self.cross_entropy(preds.flatten(0, 1), targets.flatten())
+        #
+        print(
+            self.visualize(
+                ground_truth=batch[0],
+                targets=targets[0],
+                preds=preds[0]
+            )
+        )
         # log
         if self.file:
             self.log('Train/Loss', loss.detach())
