@@ -4,6 +4,7 @@ import pytorch_lightning as pl
 from omegaconf import DictConfig
 import numpy as np
 from time import time
+from termcolor import colored
 
 from data import RecipeDataModule
 
@@ -62,8 +63,6 @@ class Model(pl.LightningModule):
         preds: torch.Tensor = None, topk: int = 3
         ) -> str:
         ''' '''
-        from termcolor import colored
-
         sentence = ''
         top_preds = ''
 
@@ -76,14 +75,21 @@ class Model(pl.LightningModule):
             else:
                 token_color = 'red'
                 pred_ps, pred_ids = pred.topk(k=topk)
-                top_preds += f'{true_name}:\n'
+                top_preds += f'{colored(true_name, "blue")}:\n'
                 top_preds += '\n\t'.join(
-                    f'{self.dataset.food_id_to_name(pred_id)} {round(float(pred_p), 20)}'
+                    colored(
+                        (
+                            f'{(pred_name := self.dataset.food_id_to_name(pred_id))}'
+                            f' {round(float(pred_p), 5)}'
+                        ),
+                        color='green' if pred_name==true_name else 'red'
+                    )
                     for pred_p, pred_id in zip(pred_ps, pred_ids)
                 )
-            sentence += colored(f'{true_name} | ', token_color)
-            
-        str_out = f'{sentence}\n{colored(top_preds, "blue")}'
+                top_preds += '\n'
+            sentence += colored(f'{true_name} | ', color=token_color)
+
+        str_out = f'{sentence}\n{top_preds}'
         return str_out
         #
         # s = ', '.join(
