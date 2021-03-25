@@ -71,23 +71,24 @@ class Model(pl.LightningModule):
                 continue
             true_name = self.dataset.food_id_to_name(true_id)
             if target_id==self.ignore_index:
-                token_color = 'green'
+                pass
+                # token_color = 'green'
             else:
-                token_color = 'red'
+                # token_color = 'red'
                 pred_ps, pred_ids = pred.topk(k=topk)
-                top_preds += f'{colored(true_name, "blue")}:\n\t'
+                top_preds += f'{true_name}:\n\t' # colored( , "blue")
                 top_preds += '\n\t'.join(
-                    colored(
-                        (
+                    ( # colored
+                        # (
                             f'{(pred_name := self.dataset.food_id_to_name(pred_id))}'
                             f' {round(float(pred_p), 5)}'
-                        ),
-                        color='green' if pred_name==true_name else 'red'
+                        # ),
+                        # color='green' if pred_name==true_name else 'red'
                     )
                     for pred_p, pred_id in zip(pred_ps, pred_ids)
                 )
                 top_preds += '\n'
-            sentence += colored(f'{true_name} | ', color=token_color)
+            sentence += f'{true_name} | ' # colored(, color=token_color)
 
         str_out = f'{sentence}\n{top_preds}'
         return str_out
@@ -96,10 +97,11 @@ class Model(pl.LightningModule):
         self, ground_truth: torch.Tensor, targets: torch.Tensor,
         preds: torch.Tensor = None, topk: int = 3
         ):
-        return f'\n{"="*40}\n'.join(
+        s = f'\n{"="*40}\n'.join(
             self.visualize_sentence(ground_truth[i], targets[i], preds[i])
             for i in range(ground_truth.size(0))
         )
+        return s
 
     def forward(self, X: torch.Tensor, pad_mask: torch.Tensor):
         '''

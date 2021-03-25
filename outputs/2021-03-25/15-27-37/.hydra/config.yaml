@@ -1,0 +1,37 @@
+datasets:
+  name: recipe_dataset
+  root_dir: data/archive
+  recipes_path: ${datasets.root_dir}/PP_recipes.csv
+  ingr_map_path: ${datasets.root_dir}/ingr_map.pkl
+masking:
+  frac_augmented: 0.15
+  frac_masked: 0.8
+  frac_random: 0.1
+  frac_unchanged: 0.1
+model:
+  d_model: 128
+  nhead: 8
+  num_layers: 4
+  dropout: 0.1
+  activation: relu
+optimizer:
+  lr: 0.001
+  type: adam
+  grad_clip: false
+compute:
+  hardware: cpu
+  precision: 32
+  num_workers: 1
+train:
+  batch_size: 128
+  train_frac: 0.95
+  val_frac: 0.05
+  test_frac: 0.0
+interval:
+  log_every: 10
+  val_every: 1
+file:
+  log: true
+  save_path: tests
+  load_path: false
+  run_name: first
