@@ -72,16 +72,18 @@ class Model(pl.LightningModule):
                 continue
             true_name = self.dataset.food_id_to_name(true_id)
             if target_id==self.ignore_index:
-                sentence += colored(f'{true_name} | ', 'green')
+                token_color = 'green'
             else:
+                token_color = 'red'
                 pred_ps, pred_ids = pred.topk(k=topk)
-                sentence += colored(true_name, 'red')
                 top_preds += f'{true_name}:\n'
                 top_preds += '\n\t'.join(
-                    f'{self.dataset.food_id_to_name(pred_id)} {round(float(pred_p), 2)}'
+                    f'{self.dataset.food_id_to_name(pred_id)} {round(float(pred_p), 20)}'
                     for pred_p, pred_id in zip(pred_ps, pred_ids)
                 )
-        str_out = f'{sentence}\n{top_preds}'
+            sentence += colored(f'{true_name} | ', token_color)
+            
+        str_out = f'{sentence}\n{colored(top_preds, "blue")}'
         return str_out
         #
         # s = ', '.join(
@@ -185,13 +187,14 @@ class Model(pl.LightningModule):
         # [(b * n) x v], [(b * n)] | calculate loss
         loss = self.cross_entropy(preds.flatten(0, 1), targets.flatten())
         #
-        print(
-            self.visualize(
-                ground_truth=batch[0],
-                targets=targets[0],
-                preds=preds[0]
+        for i in range(preds.size(0)):
+            print(
+                self.visualize(
+                    ground_truth=batch[i],
+                    targets=targets[i],
+                    preds=preds[i]
+                )
             )
-        )
         # log
         if self.file:
             self.log('Train/Loss', loss.detach())
