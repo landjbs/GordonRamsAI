@@ -30,8 +30,8 @@ compute:
 
 train:
   batch_size: 128 # number of recipes per batch
-  train_frac: 0.95 # fraction of data to use for training
-  val_frac: 0.05 # fraction of data to use for validation
+  train_frac: 0.99 # fraction of data to use for training
+  val_frac: 0.01 # fraction of data to use for validation
   test_frac: 0.0 # fraction of data to use for testing
 
 interval:

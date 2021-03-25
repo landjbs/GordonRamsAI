@@ -24,8 +24,8 @@ compute:
   num_workers: 1
 train:
   batch_size: 128
-  train_frac: 0.95
-  val_frac: 0.05
+  train_frac: 0.99
+  val_frac: 0.01
   test_frac: 0.0
 interval:
   log_every: 10

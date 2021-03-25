@@ -80,8 +80,8 @@ class Model(pl.LightningModule):
                 top_preds += '\n\t'.join(
                     ( # colored
                         # (
-                            f'{(pred_name := self.dataset.food_id_to_name(pred_id))}'
-                            f' {round(float(pred_p), 5)}'
+                        f'{(pred_name := self.dataset.food_id_to_name(pred_id))}'
+                        f' {round(float(pred_p), 5)}'
                         # ),
                         # color='green' if pred_name==true_name else 'red'
                     )
@@ -97,11 +97,13 @@ class Model(pl.LightningModule):
         self, ground_truth: torch.Tensor, targets: torch.Tensor,
         preds: torch.Tensor = None, topk: int = 3
         ):
-        s = f'\n{"="*40}\n'.join(
-            self.visualize_sentence(ground_truth[i], targets[i], preds[i])
-            for i in range(ground_truth.size(0))
-        )
-        return s
+        str_out = ''
+        for i in range(ground_truth.size(0)):
+            str_out += (
+                f'{self.visualize_sentence(ground_truth[i], targets[i], preds[i])}'
+                f'\n{"-"*80}\n'
+            )
+        return str_out
 
     def forward(self, X: torch.Tensor, pad_mask: torch.Tensor):
         '''
