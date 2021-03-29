@@ -39,7 +39,7 @@ interval:
   val_every: 1 # step interval for validation
 
 file:
-  log: True
-  save_path: 'tests'
+  log: False
+  save_path: False
   load_path: False
-  run_name: 'first'
+  run_name: False

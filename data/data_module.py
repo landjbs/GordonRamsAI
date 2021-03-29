@@ -51,22 +51,22 @@ class RecipeDataModule(LightningDataModule):
         return len(self.ingr_name_to_id_map)
 
     @cached_property
-    def vocab_size(self):
+    def vocab_size(self) -> int:
         ''' Number of unique ingredients in dataset '''
         return (self.token_count - len(self.SPECIAL_TOKENS))
 
     @cached_property
-    def num_recipes(self):
+    def num_recipes(self) -> int:
         ''' Number of unique recipes in dataset '''
         return self.recipe_df.count(axis='columns')
 
     # converters
     @cached_property
-    def ingr_id_to_name_map(self):
+    def ingr_id_to_name_map(self) -> dict:
         return {id : name for name, id in self.ingr_name_to_id_map.items()}
 
     @cached_property
-    def ingr_name_to_id_map(self):
+    def ingr_name_to_id_map(self) -> dict:
         if not hasattr(self, 'ingr_map'):
             raise RuntimeError(
                 'Must load ingr_map before calling ingr_name_to_id_map.'
@@ -89,13 +89,13 @@ class RecipeDataModule(LightningDataModule):
         return ingr_name_to_id_map
 
 
-    def food_id_to_name(self, id: Union[int, torch.Tensor]):
+    def food_id_to_name(self, id: Union[int, torch.Tensor]) -> str:
         return self.ingr_id_to_name_map[int(id)]
 
-    def food_name_to_id(self, name: str):
+    def food_name_to_id(self, name: str) -> int:
         return self.ingr_name_to_id_map[id]
 
-    def dataframe_to_tensor(self, dataframe):
+    def dataframe_to_tensor(self, dataframe) -> torch.Tensor:
         ingredient_data = dataframe['ingredient_ids'].map(
             self.id_string_to_tensor
         )
@@ -105,7 +105,7 @@ class RecipeDataModule(LightningDataModule):
         return ingredient_data
 
     @staticmethod
-    def id_string_to_tensor(s: str):
+    def id_string_to_tensor(s: str) -> torch.Tensor:
         ''' Converts string of ids to tensor. '''
         # convert string to int list
         ids = list(map(int, re.findall('\d+(?=[,\]])', s)))
@@ -130,19 +130,19 @@ class RecipeDataModule(LightningDataModule):
         targets: torch.Tensor, preds: torch.Tensor
         ) -> str:
         ''' Visualizes '''
-        
-        return s
+        raise NotImplementedError('visualize')
 
     # preparation
     def mask_ingredient_tensor(self, data):
         ''' '''
+        raise NotImplementedError('mask_ingredient_tensor')
         return data
         # select indecies for augmentation in each sequence
         # determine and apply type of augmentation
         # add cls tokens to the start of each sequence
         # data =
 
-    def prepare_recipe_dataset(self):
+    def prepare_recipe_dataset(self) -> torch.Tensor:
         # load dataframe
         recipe_df = pd.read_csv(self.RECIPIES_PATH)
         # remove unnecessary columns
@@ -180,6 +180,10 @@ class RecipeDataModule(LightningDataModule):
         _ = self.ingr_name_to_id_map
         return True
 
+    def get_token_frequencies(self, dataset: torch.Tensor) -> torch.Tensor:
+        _, counts = dataset.unique(sorted=True, return_counts=True)
+        return counts
+
     # setup
     def prepare_data(self):
         pass
@@ -188,6 +192,7 @@ class RecipeDataModule(LightningDataModule):
         # load files
         self.ingr_map = self.prepare_ingr_map()
         recipe_dataset = self.prepare_recipe_dataset()
+        self.token_frequencies = self.get_token_frequencies(recipe_dataset)
         # split and cache datasets
         (
             self.train_data,

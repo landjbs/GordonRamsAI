@@ -54,6 +54,7 @@ class Model(pl.LightningModule):
         # loss
         self.ignore_index = -1
         self.cross_entropy = nn.CrossEntropyLoss(
+            weight=(1. / self.dataset.token_frequencies),
             ignore_index=self.ignore_index
         )
 
@@ -71,10 +72,9 @@ class Model(pl.LightningModule):
                 continue
             true_name = self.dataset.food_id_to_name(true_id)
             if target_id==self.ignore_index:
-                pass
-                # token_color = 'green'
+                is_augmented = False
             else:
-                # token_color = 'red'
+                is_augmented = True
                 pred_ps, pred_ids = pred.topk(k=topk)
                 top_preds += f'{true_name}:\n\t' # colored( , "blue")
                 top_preds += '\n\t'.join(
@@ -88,6 +88,8 @@ class Model(pl.LightningModule):
                     for pred_p, pred_id in zip(pred_ps, pred_ids)
                 )
                 top_preds += '\n'
+            if is_augmented:
+                true_name = true_name.upper()
             sentence += f'{true_name} | ' # colored(, color=token_color)
 
         str_out = f'{sentence}\n{top_preds}'
@@ -98,7 +100,7 @@ class Model(pl.LightningModule):
         preds: torch.Tensor = None, topk: int = 3
         ):
         str_out = ''
-        for i in range(ground_truth.size(0)):
+        for i in range(min(ground_truth.size(0), 5)):
             str_out += (
                 f'{self.visualize_sentence(ground_truth[i], targets[i], preds[i])}'
                 f'\n{"-"*80}\n'
@@ -211,8 +213,15 @@ class Model(pl.LightningModule):
             # analyze
             # display some completions
             self.logger.experiment.add_text(
-                'Completions',
-                self.visualize(batch, targets, preds)
+                'Validation/Completions',
+                self.visualize(batch, targets, preds),
+                global_step=self.global_step
+            )
+            # display distribution over tokens
+            self.logger.experiment.add_histogram(
+                'Validation/Distribution',
+                preds.flatten(0, 1).mean(),
+                global_step=self.global_step
             )
 
     def test_step(self, batch: torch.Tensor, batch_idx: int):
