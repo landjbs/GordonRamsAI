@@ -54,10 +54,14 @@ class Model(pl.LightningModule):
         # loss
         self.ignore_index = -1
         self.cross_entropy = nn.CrossEntropyLoss(
-            weight=self.dataset.soft_token_weights(),
+            weight=self.soft_token_weights(),
             ignore_index=self.ignore_index
         )
 
+    def soft_token_weights(self, eps: float) -> torch.Tensor:
+        weights = (1. / self.dataset.token_frequencies)
+        print(weights)
+        return weights
 
     def visualize_sentence(
         self, ground_truth: torch.Tensor, targets: torch.Tensor,

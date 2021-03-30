@@ -193,11 +193,6 @@ class RecipeDataModule(LightningDataModule):
         counts[ids[keep_ids]] = id_counts[keep_ids]
         return counts
 
-    @cached_property
-    def soft_token_weights(self, eps: float):
-        ''' Experimental token weighting formula for cross-entropy loss '''
-        return (1. / self.token_frequencies)
-
     # setup
     def prepare_data(self):
         pass
