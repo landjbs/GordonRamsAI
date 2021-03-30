@@ -181,7 +181,17 @@ class RecipeDataModule(LightningDataModule):
         return True
 
     def get_token_frequencies(self, dataset: torch.Tensor) -> torch.Tensor:
-        _, counts = dataset.unique(sorted=True, return_counts=True)
+        # get count of all tokens in dataset
+        ids, id_counts = dataset.unique(
+            sorted=True, return_counts=True
+        )
+        # remove ids of special tokens (currently done manually; should be auto)
+        keep_ids = torch.ones_like(ids, dtype=torch.bool)
+        for special_id in [self.PAD_ID]:
+            keep_ids = (ids != special_id) & (keep_ids)
+
+        counts = torch.zeros(self.vocab_size, dtype=torch.long)
+        counts[ids] = id_counts
         return counts
 
     # setup
