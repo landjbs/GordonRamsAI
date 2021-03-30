@@ -54,7 +54,7 @@ class Model(pl.LightningModule):
         # loss
         self.ignore_index = -1
         self.cross_entropy = nn.CrossEntropyLoss(
-            weight=(1. / self.dataset.token_frequencies),
+            weight=self.dataset.soft_token_weights(),
             ignore_index=self.ignore_index
         )
 

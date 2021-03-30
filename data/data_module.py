@@ -182,18 +182,21 @@ class RecipeDataModule(LightningDataModule):
 
     def get_token_frequencies(self, dataset: torch.Tensor) -> torch.Tensor:
         # get count of all tokens in dataset
-        ids, id_counts = dataset.unique(
-            sorted=True, return_counts=True
-        )
+        ids, id_counts = dataset.unique(sorted=True, return_counts=True)
         # remove ids of special tokens (currently done manually; should be auto)
         keep_ids = torch.ones_like(ids, dtype=torch.bool)
-        for special_id in [self.PAD_ID]:
+        for special_id in [self.PAD_ID, self.CLS_ID]:
             keep_ids = (ids != special_id) & (keep_ids)
         # initialize all token counts to zero
         counts = torch.zeros(self.vocab_size, dtype=torch.long)
         # set all ids that pass keep mask to their calculated id mask
         counts[ids[keep_ids]] = id_counts[keep_ids]
         return counts
+
+    @cached_property
+    def soft_token_weights(self, eps: float):
+        ''' Experimental token weighting formula for cross-entropy loss '''
+        return (1. / self.token_frequencies)
 
     # setup
     def prepare_data(self):
