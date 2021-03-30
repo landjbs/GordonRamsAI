@@ -189,9 +189,10 @@ class RecipeDataModule(LightningDataModule):
         keep_ids = torch.ones_like(ids, dtype=torch.bool)
         for special_id in [self.PAD_ID]:
             keep_ids = (ids != special_id) & (keep_ids)
-
+        # initialize all token counts to zero
         counts = torch.zeros(self.vocab_size, dtype=torch.long)
-        counts[ids] = id_counts
+        # set all ids that pass keep mask to their calculated id mask
+        counts[ids[keep_ids]] = id_counts[keep_ids]
         return counts
 
     # setup
