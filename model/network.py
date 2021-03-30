@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import pytorch_lightning as pl
+import matplotlib.pyplot as plt
 from omegaconf import DictConfig
 import numpy as np
 from time import time
@@ -58,9 +59,11 @@ class Model(pl.LightningModule):
             ignore_index=self.ignore_index
         )
 
-    def soft_token_weights(self, eps: float) -> torch.Tensor:
-        weights = (1. / self.dataset.token_frequencies)
-        print(weights)
+    def soft_token_weights(self, eps: float = 1.) -> torch.Tensor:
+        weights = (1. / torch.log(self.dataset.token_frequencies + 1))
+        # plt.plot(sorted(weights))
+        # plt.show()
+        # raise RuntimeError()
         return weights
 
     def visualize_sentence(
